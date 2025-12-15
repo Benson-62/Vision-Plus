@@ -1,4 +1,4 @@
-# app/face_utils.py
+
 import numpy as np
 import io
 from PIL import Image
@@ -6,8 +6,7 @@ from deepface import DeepFace
 
 def get_face_embedding(image_bytes: bytes):
     """
-    Takes raw image bytes, returns embedding vector (numpy array)
-    or None if face not found.
+    
     """
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img_np = np.array(img)
