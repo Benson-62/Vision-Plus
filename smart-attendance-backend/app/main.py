@@ -23,10 +23,13 @@ def root():
     return {"message": "Smart attendance API is running", "user_count": count}
 
 
+from .security import hash_password
+
 @app.post("/register")
 async def register_user(
     name: str = Form(...),
     email: str = Form(...),
+    password: str = Form(...),   # ✅ ADDED
     image: UploadFile = File(...)
 ):
     existing = users_collection.find_one({"email": email})
@@ -38,18 +41,57 @@ async def register_user(
     if embedding is None:
         raise HTTPException(status_code=400, detail="No face detected in image")
 
+    password_hash = hash_password(password)  # ✅ HASHING
+
     user_doc = {
         "name": name,
         "email": email,
+        "password_hash": password_hash,  # ✅ STORED SAFELY
         "embedding": embedding.tolist(),
         "created_at": datetime.utcnow()
     }
+
     result = users_collection.insert_one(user_doc)
 
-    return {"status": "ok", "user_id": str(result.inserted_id)}
+    return {
+        "status": "ok",
+        "user_id": str(result.inserted_id)
+    }
+from .security import verify_password
+
+@app.post("/login")
+async def login_user(
+    email: str = Form(...),
+    password: str = Form(...)
+):
+    user = users_collection.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not verify_password(password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return {
+        "status": "success",
+        "name": user["name"],
+        "email": user["email"]
+    }
+
+@app.get("/profile")
+def get_profile(email: str):
+    user = users_collection.find_one(
+        {"email": email},
+        {"embedding": 0, "password_hash": 0}
+    )
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user["_id"] = str(user["_id"])
+    return user
 
 
-@app.post("/checkin")
+# @app.post("/checkin")
 # async def checkin(
 #     email: str = Form(...),
 #     image: UploadFile = File(...)
@@ -146,3 +188,31 @@ async def checkin_live(
         "dist1": dist1,
         "dist2": dist2
     }
+@app.post("/update_user")
+async def update_user(
+    email: str = Form(...),
+    name: str = Form(None),
+    image: UploadFile = File(None)
+):
+    user = users_collection.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_data = {}
+
+    if name:
+        update_data["name"] = name
+
+    if image:
+        image_bytes = await image.read()
+        embedding = get_face_embedding(image_bytes)
+        if embedding is None:
+            raise HTTPException(status_code=400, detail="No face detected")
+        update_data["embedding"] = embedding.tolist()
+
+    users_collection.update_one(
+        {"email": email},
+        {"$set": update_data}
+    )
+
+    return {"status": "updated"}
