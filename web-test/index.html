@@ -2,153 +2,272 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Attendance - Liveness Test</title>
+  <title>Smart Attendance System</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #111;
       color: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       padding: 20px;
+      max-width: 900px;
+      margin: auto;
     }
-    video, canvas {
-      border: 2px solid #444;
-      border-radius: 8px;
-      max-width: 100%;
+
+    h1, h2 {
+      color: #0a84ff;
     }
-    #controls {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
+
+    section {
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
     }
+
     input, button {
       padding: 8px 12px;
       border-radius: 4px;
       border: none;
-      outline: none;
+      margin: 5px 0;
     }
+
     button {
       background: #0a84ff;
       color: white;
       cursor: pointer;
     }
+
     button:disabled {
       background: #555;
-      cursor: default;
+      cursor: not-allowed;
     }
+
+    video, canvas, img {
+      border: 2px solid #444;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
     #result {
       margin-top: 15px;
       white-space: pre-wrap;
+      background: #000;
+      padding: 10px;
+      border-radius: 6px;
     }
   </style>
 </head>
+
 <body>
-  <h1>Smart Attendance - Liveness Check</h1>
 
-  <!-- Email input -->
-  <div id="controls">
-    <input type="email" id="email" placeholder="Enter your registered email" />
-    <button id="startCamera">Start Camera</button>
-    <button id="checkinBtn" disabled>Start Liveness Check</button>
-  </div>
+<h1>Smart Attendance – Demo Frontend</h1>
 
-  <!-- Live video -->
+<!-- ================= REGISTER USER (CAMERA) ================= -->
+<section>
+  <h2>Register New User (Camera)</h2>
+
+  <input type="text" id="reg-name" placeholder="Name"><br>
+  <input type="email" id="reg-email" placeholder="Email"><br><br>
+
+  <button onclick="startRegisterCamera()">Start Camera</button>
+  <button id="captureRegBtn" onclick="captureRegisterFace()" disabled>
+    Capture Face
+  </button>
+
+  <br><br>
+
+  <video id="reg-video" width="400" height="300" autoplay playsinline></video>
+  <canvas id="reg-canvas" width="400" height="300" style="display:none;"></canvas>
+
+  <br>
+  <img id="reg-preview" width="200" style="display:none;"><br><br>
+
+  <button id="registerBtn" onclick="registerUserCamera()" disabled>
+    Register User
+  </button>
+</section>
+
+<!-- ================= EDIT USER ================= -->
+<section>
+  <h2>Edit Existing User</h2>
+
+  <input type="email" id="edit-email" placeholder="Registered Email"><br>
+  <input type="text" id="edit-name" placeholder="New Name (optional)"><br>
+  <input type="file" id="edit-image" accept="image/*"><br><br>
+
+  <button onclick="updateUser()">Update</button>
+</section>
+
+<!-- ================= CAMERA & LIVENESS ================= -->
+<section>
+  <h2>Attendance – Liveness Check</h2>
+
+  <input type="email" id="checkin-email" placeholder="Registered Email"><br><br>
+
+  <button onclick="startCamera()">Start Camera</button>
+  <button id="checkinBtn" onclick="startLiveness()" disabled>
+    Start Liveness Check
+  </button>
+
+  <br><br>
+
   <video id="video" width="400" height="300" autoplay playsinline></video>
 
-  <!-- Hidden canvases to capture frames -->
   <canvas id="canvas1" width="400" height="300" style="display:none;"></canvas>
   <canvas id="canvas2" width="400" height="300" style="display:none;"></canvas>
+</section>
 
-  <div id="result"></div>
+<!-- ================= OUTPUT ================= -->
+<section>
+  <h2>Server Response</h2>
+  <div id="result">Waiting for action…</div>
+</section>
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas1 = document.getElementById("canvas1");
-    const canvas2 = document.getElementById("canvas2");
-    const startCameraBtn = document.getElementById("startCamera");
-    const checkinBtn = document.getElementById("checkinBtn");
-    const emailInput = document.getElementById("email");
-    const resultDiv = document.getElementById("result");
+<script>
+  const BASE_URL = "http://127.0.0.1:8000";
 
-    let stream = null;
+  /* ================= COMMON ================= */
+  const resultDiv = document.getElementById("result");
 
-    // 1) Start camera
-    startCameraBtn.onclick = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        checkinBtn.disabled = false;
-        resultDiv.textContent = "Camera started. Click 'Start Liveness Check' when ready.";
-      } catch (err) {
-        console.error(err);
-        resultDiv.textContent = "Could not access camera: " + err.message;
-      }
-    };
+  /* ================= REGISTER CAMERA ================= */
+  let regStream = null;
+  let regFaceBlob = null;
 
-    // Helper: capture current frame from video into a canvas and return a Blob
-    function captureFrameToBlob(canvas) {
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, "image/jpeg", 0.9);
-      });
+  async function startRegisterCamera() {
+    const video = document.getElementById("reg-video");
+    const captureBtn = document.getElementById("captureRegBtn");
+
+    try {
+      regStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = regStream;
+      captureBtn.disabled = false;
+      resultDiv.textContent = "Camera started for registration.";
+    } catch (err) {
+      resultDiv.textContent = "Camera error: " + err.message;
+    }
+  }
+
+  function captureRegisterFace() {
+    const video = document.getElementById("reg-video");
+    const canvas = document.getElementById("reg-canvas");
+    const preview = document.getElementById("reg-preview");
+    const registerBtn = document.getElementById("registerBtn");
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+      regFaceBlob = blob;
+      preview.src = URL.createObjectURL(blob);
+      preview.style.display = "block";
+      registerBtn.disabled = false;
+      resultDiv.textContent = "Face captured. Ready to register.";
+    }, "image/jpeg", 0.9);
+  }
+
+  async function registerUserCamera() {
+    const name = document.getElementById("reg-name").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+
+    if (!name || !email || !regFaceBlob) {
+      alert("Name, email, and face capture required");
+      return;
     }
 
-    // 2) Liveness check: capture two frames and send to backend
-    checkinBtn.onclick = async () => {
-      const email = emailInput.value.trim();
-      if (!email) {
-        resultDiv.textContent = "Please enter your registered email.";
-        return;
-      }
-      if (!stream) {
-        resultDiv.textContent = "Camera is not started.";
-        return;
-      }
+    const fd = new FormData();
+    fd.append("name", name);
+    fd.append("email", email);
+    fd.append("image", regFaceBlob, "face.jpg");
 
-      resultDiv.textContent = "Capturing frames... Please move your head or blink.";
-      checkinBtn.disabled = true;
+    const res = await fetch(`${BASE_URL}/register`, {
+      method: "POST",
+      body: fd
+    });
 
-      try {
-        // Capture first frame
-        const blob1 = await captureFrameToBlob(canvas1);
+    resultDiv.textContent = JSON.stringify(await res.json(), null, 2);
+  }
 
-        // Wait 1 second, let user move a bit
-        await new Promise((res) => setTimeout(res, 1000));
+  /* ================= EDIT USER ================= */
+  async function updateUser() {
+    const email = document.getElementById("edit-email").value;
+    const name = document.getElementById("edit-name").value;
+    const image = document.getElementById("edit-image").files[0];
 
-        // Capture second frame
-        const blob2 = await captureFrameToBlob(canvas2);
+    if (!email) {
+      alert("Email required");
+      return;
+    }
 
-        // Build form-data
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("image1", blob1, "frame1.jpg");
-        formData.append("image2", blob2, "frame2.jpg");
+    const fd = new FormData();
+    fd.append("email", email);
+    if (name) fd.append("name", name);
+    if (image) fd.append("image", image);
 
-        //  Backend URL (FastAPI)
-        const apiUrl = "http://127.0.0.1:8000/checkin_live";
+    const res = await fetch(`${BASE_URL}/update_user`, {
+      method: "POST",
+      body: fd
+    });
 
-        resultDiv.textContent = "Sending to server...";
+    resultDiv.textContent = JSON.stringify(await res.json(), null, 2);
+  }
 
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          body: formData,
-        });
+  /* ================= ATTENDANCE CAMERA ================= */
+  const video = document.getElementById("video");
+  const canvas1 = document.getElementById("canvas1");
+  const canvas2 = document.getElementById("canvas2");
+  const checkinBtn = document.getElementById("checkinBtn");
 
-        const data = await response.json();
-        resultDiv.textContent = "Server response:\n" + JSON.stringify(data, null, 2);
-      } catch (err) {
-        console.error(err);
-        resultDiv.textContent = "Error: " + err.message;
-      } finally {
-        checkinBtn.disabled = false;
-      }
-    };
-  </script>
+  let stream = null;
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      checkinBtn.disabled = false;
+      resultDiv.textContent = "Camera started for attendance.";
+    } catch (err) {
+      resultDiv.textContent = "Camera error: " + err.message;
+    }
+  }
+
+  function captureFrame(canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    return new Promise(resolve => {
+      canvas.toBlob(blob => resolve(blob), "image/jpeg", 0.9);
+    });
+  }
+
+  async function startLiveness() {
+    const email = document.getElementById("checkin-email").value.trim();
+    if (!email) {
+      alert("Email required");
+      return;
+    }
+
+    checkinBtn.disabled = true;
+    resultDiv.textContent = "Perform liveness (blink or move head)...";
+
+    const img1 = await captureFrame(canvas1);
+    await new Promise(r => setTimeout(r, 1000));
+    const img2 = await captureFrame(canvas2);
+
+    const fd = new FormData();
+    fd.append("email", email);
+    fd.append("image1", img1, "frame1.jpg");
+    fd.append("image2", img2, "frame2.jpg");
+
+    const res = await fetch(`${BASE_URL}/checkin_live`, {
+      method: "POST",
+      body: fd
+    });
+
+    resultDiv.textContent = JSON.stringify(await res.json(), null, 2);
+    checkinBtn.disabled = false;
+  }
+</script>
+
 </body>
 </html>

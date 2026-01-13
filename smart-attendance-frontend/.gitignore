@@ -1,0 +1,81 @@
+# =====================
+# OS / Editor files
+# =====================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =====================
+# Python (FastAPI backend)
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# Python build / test
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# =====================
+# FastAPI runtime files
+# =====================
+logs/
+*.log
+
+# =====================
+# Database / data
+# =====================
+data/
+*.db
+
+# If you ever store face images locally
+faces/
+uploads/
+captured_faces/
+
+# =====================
+# React frontend
+# =====================
+node_modules/
+dist/
+build/
+
+# React env variables
+.env
+.env.local
+.env.development
+.env.production
+
+# =====================
+# Misc
+# =====================
+coverage/
+.cache/
+
+venv/
+__pycache__/
+
+.env
+.env.*
+
+faces/
+uploads/
+captured_faces/
+
+node_modules/
+build/
+dist/
+
+.vscode/
+.idea/
+.DS_Store
+.venv.zip
