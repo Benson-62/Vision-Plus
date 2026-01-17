@@ -1,0 +1,50 @@
+:root {
+  --bg: #0b0f1a;
+  --card: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.15);
+  --primary: #4da3ff;
+  --text: #eaeaea;
+  --muted: #9aa4b2;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: radial-gradient(circle at top, #14203d, #05070d);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+button {
+  background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
