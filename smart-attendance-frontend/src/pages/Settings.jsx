@@ -1,0 +1,204 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
+import "../styles/settings.css";
+
+/* ================= THEME DEFINITIONS ================= */
+const THEMES = [
+  { id: "dark-blue", label: "Dark Blue", primary: "#4f8cff", bg: "#0b1220" },
+  { id: "purple", label: "Purple", primary: "#8b5cf6", bg: "#0f0a1f" },
+  { id: "emerald", label: "Emerald", primary: "#22c55e", bg: "#071a12" },
+  { id: "sunset", label: "Sunset", primary: "#fb923c", bg: "#1a0f07" },
+  { id: "light", label: "Light", primary: "#275cce", bg: "#ffffff" }
+];
+
+/* ================= HELPER FUNCTIONS ================= */
+
+function applyTheme(themeId) {
+  const selected = THEMES.find(t => t.id === themeId);
+  if (!selected) return;
+
+  document.documentElement.style.setProperty("--primary", selected.primary);
+  document.documentElement.style.setProperty("--bg", selected.bg);
+
+  if (themeId === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.style.setProperty("--text", "#0f172a");
+  } else {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.style.setProperty("--text", "#e5e7eb");
+  }
+}
+
+function saveSetting(key, value) {
+  localStorage.setItem(key, String(value));
+}
+
+function loadSetting(key, fallback) {
+  const stored = localStorage.getItem(key);
+  if (stored === null) return fallback;
+  if (stored === "true") return true;
+  if (stored === "false") return false;
+  return stored;
+}
+
+/* ================= COMPONENT ================= */
+
+export default function Settings() {
+  const navigate = useNavigate();
+
+  // 🔐 ROLE DETECTION
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
+  const [theme, setTheme] = useState(() =>
+    loadSetting("theme", "dark-blue")
+  );
+  const [darkMode, setDarkMode] = useState(() =>
+    loadSetting("darkMode", true)
+  );
+  const [notifications, setNotifications] = useState(() =>
+    loadSetting("notifications", true)
+  );
+  const [liveUpdates, setLiveUpdates] = useState(() =>
+    loadSetting("liveUpdates", true)
+  );
+
+  /* ================= APPLY THEME ================= */
+  useEffect(() => {
+    applyTheme(theme);
+    saveSetting("theme", theme);
+  }, [theme]);
+
+  /* ================= PERSIST TO STORAGE ================= */
+  useEffect(() => saveSetting("darkMode", darkMode), [darkMode]);
+  useEffect(() => saveSetting("notifications", notifications), [notifications]);
+  useEffect(() => saveSetting("liveUpdates", liveUpdates), [liveUpdates]);
+
+  return (
+    <Layout title="Settings">
+      <div className="settings-container">
+
+        {/* ACCOUNT */}
+        <section className="settings-section">
+          <h3>Account</h3>
+
+          <button
+            className="settings-btn primary"
+            onClick={() => navigate("/profile")}
+          >
+            Edit Profile
+          </button>
+
+          <button
+            className="settings-btn primary"
+            onClick={() => navigate("/profile")}
+          >
+            Change Password
+          </button>
+        </section>
+
+        {/* ✅ ADMIN CONTROLS (ONLY FOR ADMIN) */}
+        {isAdmin && (
+          <section className="settings-section">
+            <h3>Admin Controls</h3>
+
+            <button
+              className="settings-btn primary"
+              onClick={() => navigate("/admin/users")}
+            >
+              👥 Manage Employees
+            </button>
+
+            <button
+              className="settings-btn primary"
+              onClick={() => navigate("/admin/attendance")}
+            >
+              📅 Attendance Reports
+            </button>
+          </section>
+        )}
+
+        {/* APPEARANCE */}
+        <section className="settings-section">
+          <h3>Appearance</h3>
+
+          <div className="toggle-row">
+            <span>Dark Mode</span>
+            <input
+              type="checkbox"
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
+            />
+          </div>
+
+          <div className="theme-grid">
+            {THEMES.map(t => (
+              <div
+                key={t.id}
+                className={`theme-card ${theme === t.id ? "active" : ""}`}
+                onClick={() => setTheme(t.id)}
+              >
+                <div
+                  className="theme-preview"
+                  style={{ background: t.bg }}
+                >
+                  <span
+                    className="theme-dot"
+                    style={{ background: t.primary }}
+                  />
+                </div>
+                <p>{t.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* PREFERENCES */}
+        <section className="settings-section">
+          <h3>Preferences</h3>
+
+          <div className="toggle-row">
+            <span>Notifications</span>
+            <input
+              type="checkbox"
+              checked={notifications}
+              onChange={() => setNotifications(!notifications)}
+            />
+          </div>
+
+          <div className="toggle-row">
+            <span>Live Dashboard Updates</span>
+            <input
+              type="checkbox"
+              checked={liveUpdates}
+              onChange={() => setLiveUpdates(!liveUpdates)}
+            />
+          </div>
+        </section>
+
+        {/* DATA */}
+        <section className="settings-section">
+          <h3>Data</h3>
+
+          <button
+            className="settings-btn danger"
+            onClick={() => {
+              localStorage.clear();
+              navigate("/");
+            }}
+          >
+            Clear Local Data
+          </button>
+        </section>
+
+        {/* INFO */}
+        <section className="settings-section info">
+          <p>Smart Attendance System</p>
+          <small>Version 1.0.0</small>
+        </section>
+
+      </div>
+    </Layout>
+  );
+}

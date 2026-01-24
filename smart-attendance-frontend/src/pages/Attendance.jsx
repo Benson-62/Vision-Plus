@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
 const BASE_URL = "http://127.0.0.1:8000";
@@ -7,6 +8,8 @@ export default function Attendance() {
   const videoRef = useRef(null);
   const canvas1Ref = useRef(null);
   const canvas2Ref = useRef(null);
+
+  const navigate = useNavigate();
 
   const [cameraReady, setCameraReady] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,7 +29,7 @@ export default function Attendance() {
       videoRef.current.onloadedmetadata = () => {
         setCameraReady(true);
       };
-    } catch (err) {
+    } catch {
       setMessage("❌ Camera access denied");
     }
   }
@@ -48,10 +51,6 @@ export default function Attendance() {
       throw new Error("Camera not running");
     }
 
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      throw new Error("Camera not ready");
-    }
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
@@ -63,7 +62,7 @@ export default function Attendance() {
     });
   }
 
-  /* ================= ATTENDANCE (LIVENESS) ================= */
+  /* ================= ATTENDANCE ================= */
   async function markAttendance() {
     if (!email) {
       setMessage("❌ Not logged in");
@@ -79,13 +78,8 @@ export default function Attendance() {
     setMessage("Perform liveness (blink or move head)…");
 
     try {
-      // Frame 1
       const img1 = await captureFrame(canvas1Ref);
-
-      // Wait 1 second (liveness)
       await new Promise(r => setTimeout(r, 1000));
-
-      // Frame 2
       const img2 = await captureFrame(canvas2Ref);
 
       stopCamera();
@@ -102,15 +96,16 @@ export default function Attendance() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Attendance failed");
-      }
-
-      if (data.status !== "success") {
-        throw new Error(data.reason || "Face mismatch / liveness failed");
+      if (!res.ok || data.status !== "success") {
+        throw new Error(data.reason || "Attendance failed");
       }
 
       setMessage("✅ Attendance marked successfully");
+
+      // ✅ REDIRECT BACK TO DASHBOARD
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
 
     } catch (err) {
       setMessage(`❌ ${err.message}`);
@@ -123,7 +118,7 @@ export default function Attendance() {
     <Layout title="Mark Attendance">
       <div style={{ display: "grid", gap: 16 }}>
 
-        {/* VIDEO FEED */}
+        {/* VIDEO */}
         <div style={{ position: "relative" }}>
           <video
             ref={videoRef}
@@ -134,7 +129,7 @@ export default function Attendance() {
             style={{ borderRadius: 12 }}
           />
 
-          {/* FACE ALIGNMENT GUIDE */}
+          {/* FACE GUIDE */}
           <div
             style={{
               position: "absolute",
@@ -150,7 +145,7 @@ export default function Attendance() {
           />
         </div>
 
-        {/* HIDDEN CANVASES */}
+        {/* HIDDEN CANVAS */}
         <canvas ref={canvas1Ref} hidden />
         <canvas ref={canvas2Ref} hidden />
 
@@ -166,7 +161,6 @@ export default function Attendance() {
           {loading ? "Checking…" : "Mark Attendance"}
         </button>
 
-        {/* STATUS MESSAGE */}
         {message && (
           <p style={{ textAlign: "center" }}>
             {message}

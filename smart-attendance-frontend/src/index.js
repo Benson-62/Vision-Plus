@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import "./styles.css";
+import "./styles/themes.css";
+import "./styles/dashboard.css";
+import "./styles/auth.css";
+import "./styles/calendar.css";
 
+const savedTheme = localStorage.getItem("theme") || "default";
+document.documentElement.setAttribute("data-theme", savedTheme);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

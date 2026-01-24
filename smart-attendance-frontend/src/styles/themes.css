@@ -1,0 +1,133 @@
+:root {
+  --bg-main: #0B1220;
+  --bg-card: #111827;
+  --border: #1F2937;
+
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+
+  --success: #22C55E;
+  --danger: #EF4444;
+
+  --text-main: #E5E7EB;
+  --text-muted: #9CA3AF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #111827, #0B1220);
+  color: var(--text-main);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ===== DEFAULT (DARK BLUE) ===== */
+:root {
+  --bg: #0f172a;
+  --bg-card: #111827;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --primary: #2563eb;
+  --success: #16a34a;
+  --danger: #dc2626;
+}
+
+/* ===== LIGHT / WHITE ===== */
+[data-theme="light"] {
+  --bg: #f9fafb;
+  --bg-card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --success: #16a34a;
+  --danger: #dc2626;
+}
+
+/* ===== PURPLE ===== */
+[data-theme="purple"] {
+  --bg: #1e1b4b;
+  --bg-card: #312e81;
+  --text: #ede9fe;
+  --muted: #c7d2fe;
+  --primary: #8b5cf6;
+  --success: #22c55e;
+  --danger: #ef4444;
+}
+
+/* ===== GREEN ===== */
+[data-theme="green"] {
+  --bg: #022c22;
+  --bg-card: #064e3b;
+  --text: #ecfdf5;
+  --muted: #a7f3d0;
+  --primary: #10b981;
+  --success: #22c55e;
+  --danger: #ef4444;
+}
+:root {
+  --primary: #2563eb;
+  --bg: #0f172a;
+  --text: #e5e7eb;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+:root {
+  --bg: #0b1220;
+  --card: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #7c3aed;
+  --accent-soft: rgba(124, 58, 237, 0.15);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card,
+.action-card {
+  background: var(--card);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.action-card:hover {
+  box-shadow: 0 0 0 1px var(--accent);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card,
+.action-card,
+.status-card {
+  background: var(--card);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+button,
+.primary {
+  background: var(--accent);
+  color: white;
+}

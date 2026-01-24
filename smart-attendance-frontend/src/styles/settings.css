@@ -1,0 +1,163 @@
+:root {
+  --primary: #4f8cff;
+  --bg: #0b1220;
+  --card: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --radius: 16px;
+  --transition: 0.25s ease;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+}
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+}
+
+.settings-section h3 {
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.settings-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.settings-btn.primary {
+  background: var(--primary);
+  color: white;
+}
+
+.settings-btn.danger {
+  background: #dc2626;
+  color: white;
+}
+
+.settings-btn:hover {
+  transform: scale(1.02);
+  opacity: 0.95;
+}
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.toggle-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.theme-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.theme-card {
+  cursor: pointer;
+  text-align: center;
+  width: 64px;
+  transition: transform 0.2s ease;
+}
+
+.theme-card:hover {
+  transform: scale(1.1);
+}
+.theme-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  border: 2px solid transparent;
+  transition: border var(--transition), box-shadow var(--transition);
+}
+.theme-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+.theme-card.active .theme-preview {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.25);
+}
+.theme-card p {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.settings-section.info {
+  text-align: center;
+  opacity: 0.7;
+  font-size: 13px;
+}
+/* ================= LIGHT THEME FIX ================= */
+
+:root[data-theme="light"] {
+  --card: #ffffff;
+  --border: rgba(15, 23, 42, 0.12);
+}
+
+/* Card contrast fix */
+:root[data-theme="light"] .settings-section {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+}
+
+/* Theme circle visibility */
+:root[data-theme="light"] .theme-preview {
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.15);
+}
+
+/* Buttons in light mode */
+:root[data-theme="light"] .settings-btn.primary {
+  color: #ffffff;
+}
+
+/* Text contrast */
+:root[data-theme="light"] h3,
+:root[data-theme="light"] p,
+:root[data-theme="light"] span {
+  color: #0f172a;
+}
+.settings-section,
+.action-card,
+.status-card,
+.settings-btn {
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.2s ease;
+}
+.settings-btn:hover,
+.action-card:hover {
+  transform: translateY(-2px);
+}

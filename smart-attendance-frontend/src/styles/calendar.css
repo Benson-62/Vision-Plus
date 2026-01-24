@@ -1,0 +1,168 @@
+.calendar-wrapper {
+  max-width: 420px;
+  margin: auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.calendar-header button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.calendar-head {
+  text-align: center;
+  font-weight: 600;
+  color: #9aa4b2;
+}
+
+.calendar-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.calendar-cell.present {
+  background: #16a34a;
+}
+
+.calendar-cell.absent {
+  background: #1f2937;
+}
+
+.calendar-cell.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.calendar-legend i {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.calendar-legend .present { background: #16a34a; }
+.calendar-cell.absent {
+  background: #dc2626; /* 🔴 red */
+  color: white;
+}
+/* ================= ANIMATIONS ================= */
+
+/* Month fade + slide */
+.calendar-container {
+  animation: fadeSlide 0.35s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Day hover micro‑interaction */
+.calendar-day {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.calendar-day:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.4);
+}
+
+/* Click ripple feel */
+.calendar-day:active {
+  transform: scale(0.95);
+}
+
+/* Modal smooth entry */
+.modal {
+  animation: modalPop 0.25s ease;
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal overlay fade */
+.modal-overlay {
+  animation: fadeBg 0.2s ease;
+}
+
+@keyframes fadeBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* ===== MODAL ===== */
+.calendar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.calendar-modal {
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  animation: scaleIn 0.2s ease;
+}
+
+.calendar-modal button {
+  margin-top: 12px;
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9) }
+  to { transform: scale(1) }
+}

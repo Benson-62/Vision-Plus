@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { User, Mail, Lock, Camera, RotateCcw } from "lucide-react";
 import Layout from "../components/Layout";
 
 const BASE_URL = "http://127.0.0.1:8000";
@@ -7,8 +8,10 @@ const BASE_URL = "http://127.0.0.1:8000";
 export default function Signup() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-
   const navigate = useNavigate();
+
+  /* ================= STATE ================= */
+  const [step, setStep] = useState(1); // 1=Details, 2=Face, 3=Submit
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,23 +20,35 @@ export default function Signup() {
   const [cameraReady, setCameraReady] = useState(false);
   const [faceBlob, setFaceBlob] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [message, setMessage] = useState("");
+  const [captureSuccess, setCaptureSuccess] = useState(false);
+
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [quality, setQuality] = useState({
+    brightness: true,
+    sharpness: true,
+    size: true
+  });
+
+  /* ================= STEP CONTROL ================= */
+  function goToFaceStep() {
+    if (!name || !email || !password) {
+      setMessage("❌ Fill all details first");
+      return;
+    }
+    setMessage("");
+    setStep(2);
+  }
 
   /* ================= CAMERA ================= */
   async function startCamera() {
     setMessage("");
-    setPreview(null);
-    setFaceBlob(null);
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       videoRef.current.srcObject = stream;
-
-      videoRef.current.onloadedmetadata = () => {
-        setCameraReady(true);
-      };
-    } catch (err) {
+      videoRef.current.onloadedmetadata = () => setCameraReady(true);
+    } catch {
       setMessage("❌ Camera access denied");
     }
   }
@@ -47,14 +62,44 @@ export default function Signup() {
     setCameraReady(false);
   }
 
-  function captureFace() {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+  /* ================= FACE QUALITY CHECK ================= */
+  function checkFaceQuality(canvas) {
+    const ctx = canvas.getContext("2d");
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = img.data;
 
+    let brightnessSum = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      brightnessSum += (data[i] + data[i + 1] + data[i + 2]) / 3;
+    }
+
+    const avgBrightness = brightnessSum / (data.length / 4);
+    const brightnessOk = avgBrightness > 60;
+
+    let variance = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
+      variance += Math.abs(gray - avgBrightness);
+    }
+
+    const sharpnessOk = variance / (data.length / 4) > 15;
+    const sizeOk = canvas.width > 200 && canvas.height > 200;
+
+    setQuality({ brightness: brightnessOk, sharpness: sharpnessOk, size: sizeOk });
+
+    return brightnessOk && sharpnessOk && sizeOk;
+  }
+
+  /* ================= CAPTURE ================= */
+  function captureFace() {
     if (!cameraReady) {
       setMessage("❌ Camera not ready");
       return;
     }
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -62,29 +107,38 @@ export default function Signup() {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+    const isQualityOk = checkFaceQuality(canvas);
+    if (!isQualityOk) {
+      setMessage("❌ Improve lighting, keep face steady and closer");
+      return;
+    }
+
     canvas.toBlob(blob => {
       setFaceBlob(blob);
       setPreview(URL.createObjectURL(blob));
       stopCamera();
-      setMessage("✅ Face captured. Ready to register.");
+      setCaptureSuccess(true);
+      setStep(3);
+      setMessage("✅ Face captured successfully");
     }, "image/jpeg", 0.9);
   }
 
   function retake() {
     setFaceBlob(null);
     setPreview(null);
+    setCaptureSuccess(false);
     setMessage("");
+    setStep(2);
   }
 
   /* ================= REGISTER ================= */
   async function registerUser() {
-    if (!name || !email || !password || !faceBlob) {
-      setMessage("❌ All fields and face capture are required");
+    if (!faceBlob) {
+      setMessage("❌ Face capture required");
       return;
     }
 
     setLoading(true);
-
     try {
       const fd = new FormData();
       fd.append("name", name);
@@ -98,16 +152,10 @@ export default function Signup() {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Registration failed");
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Registration failed");
-      }
-
-      setMessage("✅ Registration successful! Redirecting to login…");
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      setMessage("✅ Registration successful! Redirecting...");
+      setTimeout(() => navigate("/"), 1500);
 
     } catch (err) {
       setMessage(`❌ ${err.message}`);
@@ -117,112 +165,62 @@ export default function Signup() {
   }
 
   return (
-    <Layout title="Create Account">
-      <div style={{ display: "grid", gap: 14 }}>
+    <Layout>
+      <div className="auth-container">
 
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
+        {/* STEP INDICATOR */}
+        <div className="steps">
+          <div className={step >= 1 ? "step active" : "step"}>Details</div>
+          <div className={step >= 2 ? "step active" : "step"}>Face</div>
+          <div className={step >= 3 ? "step active" : "step"}>Submit</div>
+        </div>
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-sub">Secure face‑based registration</p>
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-
-        {/* CAMERA */}
-        {!preview && (
-          <div style={{ position: "relative" }}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              width="100%"
-              height="260"
-              style={{ borderRadius: 12 }}
-            />
-
-            {/* FACE GUIDE */}
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                width: 170,
-                height: 170,
-                borderRadius: "50%",
-                border: "3px dashed #4da3ff",
-                transform: "translate(-50%, -50%)",
-                pointerEvents: "none"
-              }}
-            />
-          </div>
-        )}
-
-        <canvas ref={canvasRef} hidden />
-
-        {!preview && (
+        {/* STEP 1 */}
+        {step === 1 && (
           <>
-            <button onClick={startCamera}>
-              Start Camera
-            </button>
-
-            <button
-              onClick={captureFace}
-              disabled={!cameraReady}
-            >
-              Capture Face
-            </button>
+            <div className="input-icon"><User size={18} /><input placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} /></div>
+            <div className="input-icon"><Mail size={18} /><input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} /></div>
+            <div className="input-icon"><Lock size={18} /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+            <button onClick={goToFaceStep}>Continue to Face Capture</button>
           </>
         )}
 
-        {/* PREVIEW */}
-        {preview && (
+        {/* STEP 2 */}
+        {step === 2 && !preview && (
           <>
-            <p style={{ textAlign: "center", color: "#9aa4b2" }}>
-              Captured Face
-            </p>
+            <div style={{ position: "relative", marginTop: 12 }}>
+              <video ref={videoRef} autoPlay playsInline width="100%" height="240" style={{ borderRadius: 16 }} />
+              <div className="face-ring" />
+            </div>
 
-            <img
-              src={preview}
-              alt="Captured face"
-              style={{
-                width: 160,
-                margin: "0 auto",
-                borderRadius: 12,
-                border: "2px solid #4da3ff"
-              }}
-            />
+            <div className="quality-checks">
+              <span className={quality.brightness ? "ok" : "fail"}>💡 Lighting</span>
+              <span className={quality.sharpness ? "ok" : "fail"}>🔍 Sharpness</span>
+              <span className={quality.size ? "ok" : "fail"}>📏 Distance</span>
+            </div>
 
-            <button className="secondary" onClick={retake}>
-              Retake
-            </button>
+            <button onClick={startCamera}><Camera size={18} /> Start Camera</button>
+            <button onClick={captureFace} disabled={!cameraReady}>Capture Face</button>
           </>
         )}
 
-        <button
-          onClick={registerUser}
-          disabled={loading}
-        >
-          {loading ? "Registering…" : "Register"}
-        </button>
-
-        {message && (
-          <p style={{ textAlign: "center" }}>
-            {message}
-          </p>
+        {/* STEP 3 */}
+        {step === 3 && (
+          <>
+            <img src={preview} alt="Face" style={{ width: 150, margin: "0 auto", display: "block", borderRadius: 16 }} />
+            {captureSuccess && <div className="success-check">✓</div>}
+            <button className="secondary" onClick={retake}><RotateCcw size={16} /> Retake</button>
+            <button onClick={registerUser} disabled={loading}>{loading ? "Registering…" : "Create Account"}</button>
+          </>
         )}
 
+        {message && <p style={{ textAlign: "center" }}>{message}</p>}
       </div>
+
+      <canvas ref={canvasRef} hidden />
     </Layout>
   );
 }

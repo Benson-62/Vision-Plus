@@ -2,7 +2,7 @@ export default function Layout({ title, children }) {
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h2 style={styles.title}>{title}</h2>
+        {title && <h2 style={styles.title}>{title}</h2>}
         {children}
       </div>
     </div>
@@ -10,13 +10,14 @@ export default function Layout({ title, children }) {
 }
 
 const styles = {
-  wrapper: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20
-  },
+wrapper: {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+  background: "var(--bg)",   
+},
   card: {
     width: "100%",
     maxWidth: 420,
@@ -24,7 +25,8 @@ const styles = {
     backdropFilter: "blur(20px)",
     border: "1px solid var(--border)",
     borderRadius: "var(--radius)",
-    padding: 24
+    padding: 24,
+    color: "var(--text)"
   },
   title: {
     marginBottom: 20

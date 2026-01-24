@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Mail, Lock } from "lucide-react";
 import Layout from "../components/Layout";
 
 const BASE_URL = "http://127.0.0.1:8000";
@@ -10,12 +11,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleLogin(e) {
-    e.preventDefault();
+    e.preventDefault(); // ✅ prevents POST /
+
+    setError("");
 
     if (!email || !password) {
-      alert("Email and password are required");
+      setError("Email and password are required");
       return;
     }
 
@@ -26,6 +30,7 @@ export default function Login() {
       formData.append("email", email);
       formData.append("password", password);
 
+      // ✅ FIX: send to /login (NOT /)
       const res = await fetch(`${BASE_URL}/login`, {
         method: "POST",
         body: formData
@@ -37,50 +42,73 @@ export default function Login() {
         throw new Error(data.detail || "Login failed");
       }
 
-      // ✅ STORE LOGGED-IN USER (CRITICAL)
+      // ✅ STORE USER SESSION
       localStorage.setItem("email", data.email);
       localStorage.setItem("name", data.name);
+      localStorage.setItem("role", data.role);
 
-      // ✅ GO TO DASHBOARD
-      navigate("/dashboard");
+      // ✅ ROLE‑BASED REDIRECT
+      if (data.role === "admin") {
+        localStorage.setItem("admin_email", data.email);
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
 
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Layout title="Welcome Back">
-      <form onSubmit={handleLogin} style={{ display: "grid", gap: 14 }}>
+    <Layout>
+      <div className="auth-container">
+        <h2 className="auth-title">Welcome Back</h2>
+        <p className="auth-sub">Login to your account</p>
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <div className="input-icon">
+            <Mail size={18} />
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+          </div>
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+          <div className="input-icon">
+            <Lock size={18} />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+          </div>
 
-        <button disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          {error && (
+            <p style={{ color: "var(--danger)", fontSize: 14 }}>
+              {error}
+            </p>
+          )}
 
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => navigate("/signup")}
-        >
-          Create account
-        </button>
+          <button disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
 
-      </form>
+        <div className="auth-alt">
+          Don’t have an account?{" "}
+          <span
+            onClick={() => navigate("/signup")}
+            style={{ color: "var(--primary)", cursor: "pointer" }}
+          >
+            Create account
+          </span>
+        </div>
+      </div>
     </Layout>
   );
 }
