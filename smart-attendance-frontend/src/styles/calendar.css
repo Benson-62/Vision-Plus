@@ -11,7 +11,8 @@
 }
 
 .calendar-header button {
-  background: #2563eb;
+  background: #8b4513;
+  /* brown */
   color: white;
   border: none;
   border-radius: 50%;
@@ -29,7 +30,8 @@
 .calendar-head {
   text-align: center;
   font-weight: 600;
-  color: #9aa4b2;
+  color: #000000;
+  /* black */
 }
 
 .calendar-cell {
@@ -40,10 +42,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .calendar-cell.present {
-  background: #16a34a;
+  background: #68e8a8;
+  /* lighter green */
+  color: #064e3b;
 }
 
 .calendar-cell.absent {
@@ -53,6 +58,7 @@
 .calendar-cell.empty {
   background: transparent;
   cursor: default;
+  font-weight: normal;
 }
 
 .calendar-legend {
@@ -70,11 +76,16 @@
   margin-right: 6px;
 }
 
-.calendar-legend .present { background: #16a34a; }
-.calendar-cell.absent {
-  background: #dc2626; /* 🔴 red */
-  color: white;
+.calendar-legend .present {
+  background: #49db8f;
 }
+
+.calendar-cell.absent {
+  background: #f87171;
+  /* lighter red */
+  color: #7f1d1d;
+}
+
 /* ================= ANIMATIONS ================= */
 
 /* Month fade + slide */
@@ -87,6 +98,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -118,6 +130,7 @@
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -130,14 +143,20 @@
 }
 
 @keyframes fadeBg {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
+
 /* ===== MODAL ===== */
 .calendar-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,11 +177,21 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.9) }
-  to { transform: scale(1) }
+  from {
+    transform: scale(0.9)
+  }
+
+  to {
+    transform: scale(1)
+  }
 }

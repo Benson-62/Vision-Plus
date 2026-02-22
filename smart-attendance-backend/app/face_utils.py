@@ -16,7 +16,7 @@ def get_face_embedding(image_bytes: bytes):
             img_path=img_np,
             model_name="Facenet",  # good balance of speed/accuracy
             detector_backend="opencv",
-            enforce_detection=False
+            enforce_detection=True
         )
         if len(reps) > 0:
             emb = reps[0]["embedding"]

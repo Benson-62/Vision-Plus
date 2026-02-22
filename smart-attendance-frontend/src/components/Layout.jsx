@@ -10,14 +10,14 @@ export default function Layout({ title, children }) {
 }
 
 const styles = {
-wrapper: {
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 20,
-  background: "var(--bg)",   
-},
+  wrapper: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    background: "var(--bg)",
+  },
   card: {
     width: "100%",
     maxWidth: 420,
@@ -29,6 +29,7 @@ wrapper: {
     color: "var(--text)"
   },
   title: {
-    marginBottom: 20
+    marginBottom: 20,
+    textAlign: "center"
   }
 };

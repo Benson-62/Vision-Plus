@@ -5,8 +5,9 @@ import "../styles/settings.css";
 
 /* ================= THEME DEFINITIONS ================= */
 const THEMES = [
+  { id: "beige-brown", label: "Beige & Brown", primary: "#8b4513", bg: "#fdf5e6" },
   { id: "dark-blue", label: "Dark Blue", primary: "#4f8cff", bg: "#0b1220" },
-  { id: "purple", label: "Purple", primary: "#8b5cf6", bg: "#0f0a1f" },
+  { id: "purple", label: "Purple", primary: "#8b5cf6", bg: "#000000ff" },
   { id: "emerald", label: "Emerald", primary: "#22c55e", bg: "#071a12" },
   { id: "sunset", label: "Sunset", primary: "#fb923c", bg: "#1a0f07" },
   { id: "light", label: "Light", primary: "#275cce", bg: "#ffffff" }
@@ -24,6 +25,9 @@ function applyTheme(themeId) {
   if (themeId === "light") {
     document.documentElement.setAttribute("data-theme", "light");
     document.documentElement.style.setProperty("--text", "#0f172a");
+  } else if (themeId === "beige-brown") {
+    document.documentElement.setAttribute("data-theme", "beige-brown");
+    document.documentElement.style.setProperty("--text", "#4a2e15");
   } else {
     document.documentElement.setAttribute("data-theme", "dark");
     document.documentElement.style.setProperty("--text", "#e5e7eb");
@@ -52,7 +56,7 @@ export default function Settings() {
   const isAdmin = role === "admin";
 
   const [theme, setTheme] = useState(() =>
-    loadSetting("theme", "dark-blue")
+    loadSetting("theme", "beige-brown")
   );
   const [darkMode, setDarkMode] = useState(() =>
     loadSetting("darkMode", true)
