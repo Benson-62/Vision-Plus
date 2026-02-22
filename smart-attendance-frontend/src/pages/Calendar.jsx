@@ -15,7 +15,6 @@ export default function Calendar() {
   const [records, setRecords] = useState({});
   const [selectedDay, setSelectedDay] = useState(null);
 
-  /* ================= SAFE MONTH CHANGE ================= */
   const changeMonth = (direction) => {
     setMonth((prev) => {
       let next = prev + direction;
@@ -34,7 +33,6 @@ export default function Calendar() {
     });
   };
 
-  /* ================= FETCH MONTH ================= */
   useEffect(() => {
     if (!email) return;
 
@@ -64,7 +62,6 @@ export default function Calendar() {
     fetchMonth();
   }, [email, month, year]);
 
-  /* ================= CALENDAR CALCS ================= */
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -75,7 +72,6 @@ export default function Calendar() {
   const todayMidnight = new Date();
   todayMidnight.setHours(0, 0, 0, 0);
 
-  /* ================= UI ================= */
   return (
     <Layout title="Attendance Calendar">
       <div className="calendar-wrapper calendar-container">
@@ -147,7 +143,6 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* ================= MODAL ================= */}
       {selectedDay && (
         <div className="modal-overlay" onClick={() => setSelectedDay(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

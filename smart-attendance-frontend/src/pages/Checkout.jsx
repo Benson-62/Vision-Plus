@@ -45,7 +45,6 @@ export default function Checkout() {
     }
   }
 
-  /* ================= CAMERA ================= */
   async function startCamera() {
     setMessage("");
     setCameraReady(false);
@@ -90,7 +89,6 @@ export default function Checkout() {
     });
   }
 
-  /* ================= CHECKOUT ================= */
   async function markCheckout() {
     if (!email) {
       setMessage("❌ Not logged in");

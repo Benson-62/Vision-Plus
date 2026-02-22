@@ -25,7 +25,6 @@ body {
   font-family: "Inter", system-ui, sans-serif;
 }
 
-/* ===== DEFAULT (BEIGE-BROWN) ===== */
 :root {
   --bg: #fdf5e6;
   --bg-card: #faebd7;
@@ -37,7 +36,6 @@ body {
   --danger: #dc2626;
 }
 
-/* ===== BEIGE-BROWN EXPLICIT ===== */
 [data-theme="beige-brown"] {
   --bg: #fdf5e6;
   --bg-card: #faebd7;
@@ -49,7 +47,6 @@ body {
   --danger: #dc2626;
 }
 
-/* ===== LIGHT / WHITE ===== */
 [data-theme="light"] {
   --bg: #f9fafb;
   --bg-card: #ffffff;
@@ -60,7 +57,6 @@ body {
   --danger: #dc2626;
 }
 
-/* ===== PURPLE ===== */
 [data-theme="purple"] {
   --bg: #1e1b4b;
   --bg-card: #312e81;
@@ -71,7 +67,6 @@ body {
   --danger: #ef4444;
 }
 
-/* ===== GREEN ===== */
 [data-theme="green"] {
   --bg: #022c22;
   --bg-card: #064e3b;

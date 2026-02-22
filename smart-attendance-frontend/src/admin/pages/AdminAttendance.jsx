@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
+import "../styles/admin.css";
 
 const BASE_URL = "http://127.0.0.1:8000";
 
@@ -8,52 +9,76 @@ export default function AdminAttendance() {
   const navigate = useNavigate();
 
   const [records, setRecords] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [email, setEmail] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
 
-  /* ================= ADMIN GUARD ================= */
   useEffect(() => {
     if (localStorage.getItem("role") !== "admin") {
       navigate("/");
+      return;
     }
+    fetchEmployees();
   }, [navigate]);
 
-  /* ================= FETCH BY USER ================= */
-  async function fetchByUser() {
-    setError("");
+  async function fetchEmployees() {
     try {
       const adminEmail = localStorage.getItem("admin_email");
-      const res = await fetch(
-        `${BASE_URL}/admin/attendance/user?email=${email}&admin_email=${adminEmail}`
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to fetch records");
-
-      setRecords(data.records || []);
+      const res = await fetch(`${BASE_URL}/admin/users?email=${adminEmail}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEmployees(data);
+      }
     } catch (err) {
-      setError(err.message);
-      setRecords([]);
+      console.error("Failed to load employees:", err);
     }
   }
 
-  /* ================= FETCH BY DATE ================= */
-  async function fetchByDate() {
+  function formatDateForDB(dateStr) {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    const d = new Date(year, parseInt(month) - 1, day);
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    const monthStr = d.toLocaleString('en-US', { month: 'short' });
+    const yearStr = d.getFullYear();
+    return `${dayStr} ${monthStr} ${yearStr}`;
+  }
+
+  async function handleSearch() {
     setError("");
+    setRecords([]);
+
+    if (!email && !date) {
+      setError("Please select an Employee or a Date to search.");
+      return;
+    }
+
     try {
       const adminEmail = localStorage.getItem("admin_email");
-      const res = await fetch(
-        `${BASE_URL}/admin/attendance/date?date=${date}&admin_email=${adminEmail}`
-      );
+      const formattedDate = formatDateForDB(date);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to fetch records");
-
-      setRecords(data.records || []);
+      if (email && date) {
+        // Fetch all for user, then filter locally by formatted date
+        const res = await fetch(`${BASE_URL}/admin/attendance/user?email=${email}&admin_email=${adminEmail}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to fetch records");
+        setRecords((data.records || []).filter(r => r.date === formattedDate));
+      } else if (email) {
+        // User only
+        const res = await fetch(`${BASE_URL}/admin/attendance/user?email=${email}&admin_email=${adminEmail}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to fetch records");
+        setRecords(data.records || []);
+      } else if (date) {
+        // Date only
+        const res = await fetch(`${BASE_URL}/admin/attendance/date?date=${formattedDate}&admin_email=${adminEmail}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to fetch records");
+        setRecords(data.records || []);
+      }
     } catch (err) {
       setError(err.message);
-      setRecords([]);
     }
   }
 
@@ -61,7 +86,6 @@ export default function AdminAttendance() {
     <Layout title="Attendance Reports">
       <div className="attendance-page">
 
-        {/* ===== SEARCH CARD ===== */}
         <div className="attendance-card">
 
           <h3 className="section-title">Search Attendance</h3>
@@ -69,33 +93,41 @@ export default function AdminAttendance() {
           {/* Employee Email */}
           <div className="field-group">
             <label>Employee Email</label>
-<br></br>
+            <br></br>
             <div className="input-with-icon">
-              <span className="icon">📧</span>
+              <span className="icon">👤</span>
               <input
-                type="email"
-                placeholder="employee@email.com"
+                list="employee-options"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                placeholder="Search by Name or Email..."
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "var(--text)",
+                  width: "100%",
+                  fontSize: "0.95rem"
+                }}
               />
+              <datalist id="employee-options">
+                {employees.map(emp => (
+                  <option key={emp._id} value={emp.email}>
+                    {emp.name}
+                  </option>
+                ))}
+              </datalist>
             </div>
-<br></br>
-            <button
-              className="btn primary"
-              style={{ marginTop: "6px" }}
-              onClick={fetchByUser}
-            >
-              Search User
-            </button>
+            {/* Combine buttons into one big search button at the bottom */}
           </div>
 
           {/* Divider spacing */}
-          <div style={{ height: 20 }} />
+          <div style={{ height: 10 }} />
 
           {/* Date */}
           <div className="field-group">
-            <label>Date</label>
-<br></br>
+            <label>Date (Optional)</label>
+            <br></br>
             <div className="input-with-icon">
               <span className="icon">📅</span>
               <input
@@ -104,15 +136,15 @@ export default function AdminAttendance() {
                 onChange={e => setDate(e.target.value)}
               />
             </div>
-<br></br>
-            <button
-              className="btn primary"
-              style={{ marginTop: "6px" }}
-              onClick={fetchByDate}
-            >
-              Search Date
-            </button>
           </div>
+
+          <button
+            className="btn primary"
+            style={{ marginTop: "16px", width: "100%" }}
+            onClick={handleSearch}
+          >
+            Search Logs
+          </button>
 
           {error && (
             <p style={{ marginTop: 16, color: "var(--danger)" }}>
@@ -121,7 +153,6 @@ export default function AdminAttendance() {
           )}
         </div>
 
-        {/* ===== RESULTS CARD ===== */}
         <div className="attendance-card" style={{ marginTop: 32 }}>
 
           <h3 className="section-title">Results</h3>

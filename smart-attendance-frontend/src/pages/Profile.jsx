@@ -20,7 +20,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
-  /* ================= LOAD PROFILE ================= */
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
     if (!storedEmail) return navigate("/login");
@@ -38,7 +37,6 @@ export default function Profile() {
       });
   }, [navigate]);
 
-  /* ================= VERIFY PASSWORD ================= */
   async function verifyPassword() {
     setLoading(true);
     setMsg("");
@@ -65,7 +63,6 @@ export default function Profile() {
     setLoading(false);
   }
 
-  /* ================= UPDATE PROFILE ================= */
   async function updateProfile() {
     setLoading(true);
     setMsg("");

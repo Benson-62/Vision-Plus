@@ -86,7 +86,6 @@
   color: #7f1d1d;
 }
 
-/* ================= ANIMATIONS ================= */
 
 /* Month fade + slide */
 .calendar-container {
@@ -152,7 +151,6 @@
   }
 }
 
-/* ===== MODAL ===== */
 .calendar-modal-overlay {
   position: fixed;
   inset: 0;

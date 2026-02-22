@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import "../styles/settings.css";
 
-/* ================= THEME DEFINITIONS ================= */
 const THEMES = [
   { id: "beige-brown", label: "Beige & Brown", primary: "#8b4513", bg: "#fdf5e6" }
 ];
 
-/* ================= HELPER FUNCTIONS ================= */
 
 function applyTheme(themeId) {
   const selected = THEMES.find(t => t.id === themeId);
@@ -41,7 +39,6 @@ function loadSetting(key, fallback) {
   return stored;
 }
 
-/* ================= COMPONENT ================= */
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -63,13 +60,11 @@ export default function Settings() {
     loadSetting("liveUpdates", true)
   );
 
-  /* ================= APPLY THEME ================= */
   useEffect(() => {
     applyTheme(theme);
     saveSetting("theme", theme);
   }, [theme]);
 
-  /* ================= PERSIST TO STORAGE ================= */
   useEffect(() => saveSetting("darkMode", darkMode), [darkMode]);
   useEffect(() => saveSetting("notifications", notifications), [notifications]);
   useEffect(() => saveSetting("liveUpdates", liveUpdates), [liveUpdates]);

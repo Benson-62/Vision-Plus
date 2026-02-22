@@ -47,13 +47,11 @@ export default function Login() {
       localStorage.setItem("name", data.name);
       localStorage.setItem("role", data.role);
 
-      // ✅ ROLE‑BASED REDIRECT
+      // ✅ POOKIE ANIMATION REDIRECT
       if (data.role === "admin") {
         localStorage.setItem("admin_email", data.email);
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/dashboard");
       }
+      navigate("/welcome", { state: { role: data.role } });
 
     } catch (err) {
       setError(err.message);

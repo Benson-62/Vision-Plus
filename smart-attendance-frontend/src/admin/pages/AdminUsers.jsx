@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
+import "../styles/admin.css";
 
 const BASE_URL = "http://127.0.0.1:8000";
 

@@ -31,7 +31,6 @@ export default function Dashboard() {
   const [email, setEmail] = useState("");
   const [todayRecord, setTodayRecord] = useState(null);
 
-  /* ================= AUTH CHECK ================= */
   useEffect(() => {
     const storedName = localStorage.getItem("name");
     const storedEmail = localStorage.getItem("email");
@@ -45,7 +44,6 @@ export default function Dashboard() {
     setEmail(storedEmail);
   }, [navigate]);
 
-  /* ================= FETCH TODAY ATTENDANCE ================= */
   useEffect(() => {
     if (!email) return;
 
@@ -76,7 +74,6 @@ export default function Dashboard() {
     fetchToday();
   }, [email]);
 
-  /* ================= DERIVED STATE ================= */
   const isCheckedIn = Boolean(todayRecord?.in);
   const isCheckedOut = Boolean(todayRecord?.out);
 
@@ -84,7 +81,6 @@ export default function Dashboard() {
     <Layout>
       <div className="dashboard">
 
-        {/* ===== HEADER ===== */}
         <div className="dash-header">
           <div>
             <h2>Welcome, {name}</h2>
@@ -102,7 +98,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* ===== TODAY STATUS ===== */}
         <div className="status-card">
           <div>
             <p className="card-title">Today’s Status</p>
@@ -131,7 +126,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ===== ACTION GRID ===== */}
         <div className="action-grid">
 
         

@@ -1,7 +1,7 @@
-export default function Layout({ title, children }) {
+export default function Layout({ title, children, maxWidth = 420 }) {
   return (
     <div style={styles.wrapper}>
-      <div style={styles.card}>
+      <div style={{ ...styles.card, maxWidth }}>
         {title && <h2 style={styles.title}>{title}</h2>}
         {children}
       </div>
@@ -20,7 +20,6 @@ const styles = {
   },
   card: {
     width: "100%",
-    maxWidth: 420,
     background: "var(--card)",
     backdropFilter: "blur(20px)",
     border: "1px solid var(--border)",

@@ -45,7 +45,6 @@ export default function Attendance() {
     }
   }
 
-  /* ================= CAMERA ================= */
   async function startCamera() {
     setMessage("");
     setCameraReady(false);
@@ -90,7 +89,6 @@ export default function Attendance() {
     });
   }
 
-  /* ================= ATTENDANCE ================= */
   async function markAttendance() {
     if (!email) {
       setMessage("❌ Not logged in");

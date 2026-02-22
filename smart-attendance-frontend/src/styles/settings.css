@@ -118,7 +118,6 @@ body {
   opacity: 0.7;
   font-size: 13px;
 }
-/* ================= LIGHT THEME FIX ================= */
 
 :root[data-theme="light"] {
   --card: #ffffff;

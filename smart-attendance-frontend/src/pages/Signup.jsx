@@ -10,7 +10,6 @@ export default function Signup() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  /* ================= STATE ================= */
   const [step, setStep] = useState(1); // 1=Details, 2=Face, 3=Submit
 
   const [name, setName] = useState("");
@@ -31,7 +30,6 @@ export default function Signup() {
     size: true
   });
 
-  /* ================= STEP CONTROL ================= */
   function goToFaceStep() {
     if (!name || !email || !password) {
       setMessage("❌ Fill all details first");
@@ -41,7 +39,6 @@ export default function Signup() {
     setStep(2);
   }
 
-  /* ================= CAMERA ================= */
   async function startCamera() {
     setMessage("");
     try {
@@ -62,7 +59,6 @@ export default function Signup() {
     setCameraReady(false);
   }
 
-  /* ================= FACE QUALITY CHECK ================= */
   function checkFaceQuality(canvas) {
     const ctx = canvas.getContext("2d");
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -91,7 +87,6 @@ export default function Signup() {
     return brightnessOk && sharpnessOk && sizeOk;
   }
 
-  /* ================= CAPTURE ================= */
   function captureFace() {
     if (!cameraReady) {
       setMessage("❌ Camera not ready");
@@ -131,7 +126,6 @@ export default function Signup() {
     setStep(2);
   }
 
-  /* ================= REGISTER ================= */
   async function registerUser() {
     if (!faceBlob) {
       setMessage("❌ Face capture required");

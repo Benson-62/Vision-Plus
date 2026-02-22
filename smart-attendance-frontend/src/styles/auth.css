@@ -47,7 +47,6 @@
   color: var(--text-muted);
 }
 
-/* ===== ANIMATION ===== */
 @keyframes fadeUp {
   from {
     opacity: 0;
