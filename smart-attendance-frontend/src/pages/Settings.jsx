@@ -5,12 +5,7 @@ import "../styles/settings.css";
 
 /* ================= THEME DEFINITIONS ================= */
 const THEMES = [
-  { id: "beige-brown", label: "Beige & Brown", primary: "#8b4513", bg: "#fdf5e6" },
-  { id: "dark-blue", label: "Dark Blue", primary: "#4f8cff", bg: "#0b1220" },
-  { id: "purple", label: "Purple", primary: "#8b5cf6", bg: "#000000ff" },
-  { id: "emerald", label: "Emerald", primary: "#22c55e", bg: "#071a12" },
-  { id: "sunset", label: "Sunset", primary: "#fb923c", bg: "#1a0f07" },
-  { id: "light", label: "Light", primary: "#275cce", bg: "#ffffff" }
+  { id: "beige-brown", label: "Beige & Brown", primary: "#8b4513", bg: "#fdf5e6" }
 ];
 
 /* ================= HELPER FUNCTIONS ================= */
