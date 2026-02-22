@@ -15,10 +15,13 @@ def get_face_embedding(image_bytes: bytes):
         reps = DeepFace.represent(
             img_path=img_np,
             model_name="Facenet",  # good balance of speed/accuracy
-            enforce_detection=True
+            detector_backend="opencv",
+            enforce_detection=False
         )
-        emb = reps[0]["embedding"]
-        return np.array(emb, dtype="float32")
+        if len(reps) > 0:
+            emb = reps[0]["embedding"]
+            return np.array(emb, dtype="float32")
+        return None
     except Exception as e:
         print("DeepFace error:", e)
         return None

@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { BluetoothConnected, Bluetooth } from "lucide-react";
+import bleService from "../utils/bleService";
 
 const BASE_URL = "http://127.0.0.1:8000";
 
@@ -14,8 +16,34 @@ export default function Checkout() {
   const [cameraReady, setCameraReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [bleConnected, setBleConnected] = useState(false);
+  const [bleError, setBleError] = useState("");
+
+  const TARGET_GATE_NAME = "OnePlus Nord Buds 3";
 
   const email = localStorage.getItem("email");
+
+  useEffect(() => {
+    // Initial check
+    const connected = bleService.getConnectedDevices().some(d => d.state === "Connected");
+    setBleConnected(connected);
+
+    // Subscribe to live changes
+    const unsubscribe = bleService.subscribe((devices) => {
+      setBleConnected(devices.some(d => d.state === "Connected"));
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  async function connectBLE() {
+    setBleError("");
+    try {
+      await bleService.connectDevice(TARGET_GATE_NAME);
+    } catch (err) {
+      setBleError(`Failed to find ${TARGET_GATE_NAME}. Ensure Gate BLE is nearby.`);
+    }
+  }
 
   /* ================= CAMERA ================= */
   async function startCamera() {
@@ -74,6 +102,11 @@ export default function Checkout() {
       return;
     }
 
+    if (!bleConnected) {
+      setMessage("❌ You must be in range of the Gate BLE device");
+      return;
+    }
+
     setLoading(true);
     setMessage("Perform liveness (blink or move head)…");
 
@@ -97,7 +130,7 @@ export default function Checkout() {
       const data = await res.json();
 
       if (!res.ok || data.status !== "success") {
-        throw new Error(data.reason || "Checkout failed");
+        throw new Error(data.detail || data.reason || "Checkout failed");
       }
 
       setMessage("✅ Checked out successfully");
@@ -149,6 +182,47 @@ export default function Checkout() {
         <canvas ref={canvas1Ref} hidden />
         <canvas ref={canvas2Ref} hidden />
 
+        {/* BLE STATUS CARD */}
+        <div style={{
+          padding: 12,
+          borderRadius: 8,
+          backgroundColor: "#f3f4f6",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <strong>Location Status: </strong>
+            <br />
+            {bleConnected ? (
+              <span style={{ color: "green", display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                <BluetoothConnected size={16} /> Verified (In Range)
+              </span>
+            ) : (
+              <span style={{ color: "#d97706", display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                <Bluetooth size={16} /> Not Verified
+              </span>
+            )}
+          </div>
+          {!bleConnected && (
+            <button
+              onClick={connectBLE}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              Verify BLE
+            </button>
+          )}
+        </div>
+        {bleError && <p style={{ color: "red", fontSize: 13, margin: 0 }}>{bleError}</p>}
+
         {/* CONTROLS */}
         <button onClick={startCamera}>
           Start Camera
@@ -156,7 +230,8 @@ export default function Checkout() {
 
         <button
           onClick={markCheckout}
-          disabled={!cameraReady || loading}
+          disabled={!cameraReady || loading || !bleConnected}
+          style={{ opacity: (!cameraReady || loading || !bleConnected) ? 0.6 : 1 }}
         >
           {loading ? "Checking…" : "Confirm Check‑Out"}
         </button>
