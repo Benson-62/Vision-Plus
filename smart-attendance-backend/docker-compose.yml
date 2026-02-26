@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: smart-attendance-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017}
+      - SECRET_KEY=${SECRET_KEY:-your_production_secret_key_here}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+    depends_on:
+      - mongo
+    networks:
+      - attendance-network
+
+  mongo:
+    image: mongo:latest
+    container_name: smart-attendance-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - attendance-network
+
+volumes:
+  mongo-data:
+
+
+networks:
+  attendance-network:
+    driver: bridge
+
+# Instructions to build and run container:
+# 1. Provide an .env file containing the required environment variables (MONGO_URL, SECRET_KEY, etc.).
+# 2. Run the command: docker-compose up -d --build
+# 3. View logs with: docker-compose logs -f

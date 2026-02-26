@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Resp
 import Layout from "../../components/Layout";
 import "../styles/admin.css";
 
-const BASE_URL = "http://127.0.0.1:8000";
+import api from "../../api";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -79,14 +79,8 @@ export default function AdminDashboard() {
 
   async function fetchStats() {
     try {
-      const token = localStorage.getItem("token");
-      // Use new daily summary endpoint
-      const res = await fetch(
-        `${BASE_URL}/admin/attendance/daily-summary`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await res.json();
-      setStats(data);
+      const res = await api.get('/admin/attendance/daily-summary');
+      setStats(res.data);
     } catch (err) {
       console.error("Failed to fetch admin stats", err);
     }
@@ -94,20 +88,14 @@ export default function AdminDashboard() {
 
   async function fetchTodayRecords() {
     try {
-      const token = localStorage.getItem("token");
       const d = new Date();
       const dayStr = String(d.getDate()).padStart(2, '0');
       const monthStr = d.toLocaleString('en-US', { month: 'short' });
       const yearStr = d.getFullYear();
       const formattedDate = `${dayStr} ${monthStr} ${yearStr}`;
 
-      const res = await fetch(`${BASE_URL}/admin/attendance/date?date=${formattedDate}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setTodayRecords(data.records || []);
-      }
+      const res = await api.get(`/admin/attendance/date?date=${formattedDate}`);
+      setTodayRecords(res.data?.records || []);
     } catch (err) {
       console.error("Failed to fetch today's records", err);
     }
@@ -115,14 +103,8 @@ export default function AdminDashboard() {
 
   async function fetchLivePresence() {
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${BASE_URL}/admin/live-presence`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setLivePresence(data);
-      }
+      const res = await api.get('/admin/live-presence');
+      setLivePresence(res.data);
     } catch (err) {
       console.error("Failed to fetch live presence", err);
     }
@@ -130,12 +112,8 @@ export default function AdminDashboard() {
 
   async function fetchAnalytics() {
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${BASE_URL}/admin/analytics`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setAnalytics(data);
+      const res = await api.get('/admin/analytics');
+      setAnalytics(res.data);
     } catch (err) {
       console.error("Failed to fetch analytics", err);
     }
@@ -258,7 +236,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {livePresence.employees.map((e, idx) => (
+                    {(livePresence.employees || []).map((e, idx) => (
                       <tr key={idx} style={{ borderBottom: "1px solid var(--border)" }}>
                         <td style={{ padding: "12px 8px" }}>{e.email.split("@")[0]}</td>
                         <td style={{ padding: "12px 8px" }}>
@@ -291,8 +269,8 @@ export default function AdminDashboard() {
               <div style={{ width: "100%", height: 300 }}>
                 <ResponsiveContainer>
                   <PieChart>
-                    <Pie data={analytics.pie_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                      {analytics.pie_data.map((entry, index) => (
+                    <Pie data={analytics.pie_data || []} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                      {(analytics.pie_data || []).map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={["#ef4444", "#f59e0b", "#8b5cf6", "#10b981"][index % 4]} />
                       ))}
                     </Pie>

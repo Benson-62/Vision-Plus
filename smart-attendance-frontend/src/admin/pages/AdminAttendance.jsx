@@ -23,6 +23,7 @@ export default function AdminAttendance() {
       return;
     }
     fetchAttendanceTable();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, page, dateStr, department, search]);
 
   async function fetchAttendanceTable() {

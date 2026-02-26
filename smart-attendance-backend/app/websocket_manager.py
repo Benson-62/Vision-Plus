@@ -11,7 +11,6 @@ class ConnectionManager:
         self.active_connections: Dict[str, list[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, email: str):
-        await websocket.accept()
         if email not in self.active_connections:
             self.active_connections[email] = []
         self.active_connections[email].append(websocket)

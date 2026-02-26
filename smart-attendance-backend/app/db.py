@@ -1,15 +1,11 @@
 # app/db.py
-import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
+from app.core.config import settings
 
-# Load variables from .env
-load_dotenv()
-
-MONGO_URL = os.getenv("MONGO_URL")
+MONGO_URL = settings.MONGO_URL
 
 if not MONGO_URL:
-    raise ValueError("MONGO_URL not set in .env")
+    raise ValueError("MONGO_URL not set in configuration")
 
 client = MongoClient(MONGO_URL)
 
@@ -24,6 +20,7 @@ messages_collection = db["messages"]
 notifications_collection = db["notifications"]
 conversations_collection = db["conversations"]
 groups_collection = db["groups"]
+files_collection = db["files"]
 
 # ================= BACKGROUND INDEXES =================
 # These indexes speed up the most common queries (analytics, logins, reporting).
@@ -59,5 +56,9 @@ try:
     
     # Groups
     groups_collection.create_index([("members", pymongo.ASCENDING)], background=True)
+    
+    # Files
+    files_collection.create_index([("user_email", pymongo.ASCENDING)], background=True)
+    files_collection.create_index([("timestamp", pymongo.DESCENDING)], background=True)
 except Exception as e:
     print(f"Warning: Failed to create indexes: {e}")

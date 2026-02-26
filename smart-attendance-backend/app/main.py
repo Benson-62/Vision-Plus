@@ -1,9 +1,11 @@
 from fastapi import (
-    FastAPI, UploadFile, File, Form,
+    FastAPI, UploadFile, File, Form, Request,
     HTTPException, WebSocket, WebSocketDisconnect, Query, Depends
 )
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.core.config import settings
 from datetime import datetime, date
 import numpy as np
 import cv2
@@ -18,12 +20,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import math
 
 # ================= APP =================
-app = FastAPI()
+app = FastAPI(title="Smart Attendance API", version="1.0.0")
 
 # ================= CORS =================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

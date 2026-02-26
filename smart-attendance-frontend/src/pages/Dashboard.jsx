@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import {
   Camera,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import Layout from "../components/Layout";
 
-const BASE_URL = "http://127.0.0.1:8000";
+
 
 function ActionCard({ icon, title, subtitle, onClick }) {
   return (
@@ -59,14 +60,10 @@ export default function Dashboard() {
 
     async function fetchToday() {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(
-          `${BASE_URL}/attendance/history?email=${email}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = await res.json();
+        const res = await api.get(`/attendance/history?email=${email}`);
+        const data = res.data;
 
-        if (!res.ok || !Array.isArray(data)) {
+        if (!Array.isArray(data)) {
           setTodayRecord(null);
           return;
         }

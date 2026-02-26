@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-import { Upload, File } from "lucide-react";
+import { Upload, File, FileText, Download, Clock } from "lucide-react";
 import "../styles/dashboard.css";
 
 const BASE_URL = "http://127.0.0.1:8000";
@@ -9,6 +9,32 @@ export default function FileUpload() {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
+    const [uploadHistory, setUploadHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(true);
+
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const fetchHistory = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${BASE_URL}/upload/history`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUploadHistory(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch upload history:", err);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -46,6 +72,12 @@ export default function FileUpload() {
 
             setMessage({ type: "success", text: `File uploaded successfully! Available at: ${data.url}` });
             setFile(null);
+
+            // Add to history instantly
+            if (data.record) {
+                setUploadHistory(prev => [data.record, ...prev]);
+            }
+
             // Reset input
             document.getElementById("file-input").value = "";
         } catch (err) {
@@ -139,6 +171,68 @@ export default function FileUpload() {
                             {loading ? "Uploading..." : "Upload File"}
                         </button>
                     </form>
+                </div>
+
+                {/* Upload History Section */}
+                <div className="card" style={{ padding: "30px", borderRadius: "16px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", marginTop: "30px" }}>
+                    <h3 style={{ marginBottom: "20px", marginTop: "0", display: "flex", alignItems: "center", gap: "10px", fontSize: "1.2rem", fontWeight: "600" }}>
+                        <Clock size={20} color="var(--primary)" />
+                        Upload History
+                    </h3>
+
+                    {loadingHistory ? (
+                        <p style={{ color: "var(--muted)", textAlign: "center", padding: "20px 0" }}>Loading history...</p>
+                    ) : uploadHistory.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "30px 0", color: "var(--muted)", background: "var(--background)", borderRadius: "8px" }}>
+                            <FileText size={40} color="var(--border)" style={{ marginBottom: "10px" }} />
+                            <p style={{ margin: 0 }}>No files uploaded yet.</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: "auto" }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                                <thead>
+                                    <tr style={{ borderBottom: "1px solid var(--border)", color: "var(--muted)", fontSize: "0.85rem", textTransform: "uppercase" }}>
+                                        <th style={{ padding: "12px 16px", fontWeight: "600" }}>File Name</th>
+                                        <th style={{ padding: "12px 16px", fontWeight: "600" }}>Size</th>
+                                        <th style={{ padding: "12px 16px", fontWeight: "600" }}>Uploaded At</th>
+                                        <th style={{ padding: "12px 16px", fontWeight: "600", textAlign: "right" }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {uploadHistory.map((item) => (
+                                        <tr key={item._id} style={{ borderBottom: "1px solid var(--border)", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "var(--background)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                            <td style={{ padding: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
+                                                <div style={{ background: "rgba(79, 70, 229, 0.1)", padding: "8px", borderRadius: "8px" }}>
+                                                    <FileText size={16} color="var(--primary)" />
+                                                </div>
+                                                <span style={{ fontWeight: "500", color: "var(--text)", wordBreak: "break-all" }}>{item.filename}</span>
+                                            </td>
+                                            <td style={{ padding: "16px", color: "var(--muted)", fontSize: "0.9rem" }}>
+                                                {(item.size / 1024 / 1024).toFixed(2)} MB
+                                            </td>
+                                            <td style={{ padding: "16px", color: "var(--muted)", fontSize: "0.9rem" }}>
+                                                {new Date(item.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                <br />
+                                                <span style={{ fontSize: "0.8rem" }}>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </td>
+                                            <td style={{ padding: "16px", textAlign: "right" }}>
+                                                <a
+                                                    href={`${BASE_URL}${item.url}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--primary)", textDecoration: "none", fontWeight: "500", fontSize: "0.9rem", padding: "6px 12px", borderRadius: "6px", background: "rgba(79, 70, 229, 0.05)", transition: "background 0.2s" }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = "rgba(79, 70, 229, 0.15)"}
+                                                    onMouseLeave={e => e.currentTarget.style.background = "rgba(79, 70, 229, 0.05)"}
+                                                >
+                                                    <Download size={14} /> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
         </Layout>

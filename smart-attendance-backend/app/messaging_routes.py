@@ -4,7 +4,10 @@ import os
 import uuid
 from datetime import datetime
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, HTTPException, UploadFile, File
-from .security import get_current_user, verify_password, SECRET_KEY, ALGORITHM
+from .security import get_current_user, verify_password
+from app.core.config import settings
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 from jose import jwt, JWTError
 from bson import ObjectId
 from pydantic import BaseModel
@@ -25,17 +28,20 @@ async def get_current_user_ws(token: str):
         if user is None:
             raise ValueError("User not found")
         return user
-    except JWTError:
-        raise ValueError("Invalid JWT")
+    except JWTError as e:
+        print(f"DEBUG JWT Error: {e}")
+        raise ValueError(f"Invalid JWT: {e}")
 
 @router.websocket("/ws/{token}")
 async def websocket_endpoint(websocket: WebSocket, token: str):
+    await websocket.accept()
+    logger.info(f"Received WS token (length {len(token)}): {token[:20]}...{token[-20:]}")
     try:
         user = await get_current_user_ws(token)
         email = user["email"]
     except Exception as e:
-        logger.error(f"WebSocket auth failed: {e}")
-        await websocket.close(code=1008)
+        logger.error(f"WebSocket auth failed. e_type={type(e).__name__}, e_args={e.args}, token_len={len(token)}")
+        await websocket.close(code=1008, reason="Authentication failed or token expired")
         return
 
     await manager.connect(websocket, email)

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.security import get_current_user
+from app.db import files_collection
+from datetime import datetime
 import uuid
 import os
 
@@ -29,9 +31,33 @@ async def upload_file(file: UploadFile = File(...), current_user: dict = Depends
         
     file_url = f"/uploads/general/{unique_filename}"
     
+    # Save record to database
+    file_record = {
+        "filename": file.filename,
+        "url": file_url,
+        "type": file.content_type,
+        "size": len(content),
+        "user_email": current_user["email"],
+        "timestamp": datetime.utcnow().isoformat() + "Z"
+    }
+    
+    res = files_collection.insert_one(file_record)
+    file_record["_id"] = str(res.inserted_id)
+    
     return {
         "status": "success",
         "url": file_url,
         "filename": file.filename,
-        "type": file.content_type
+        "type": file.content_type,
+        "record": file_record
     }
+
+@router.get("/history")
+def get_upload_history(current_user: dict = Depends(get_current_user)):
+    user_email = current_user["email"]
+    files = list(files_collection.find({"user_email": user_email}).sort("timestamp", -1))
+    
+    for f in files:
+        f["_id"] = str(f["_id"])
+        
+    return files

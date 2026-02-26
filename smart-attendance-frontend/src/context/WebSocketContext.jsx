@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import api from '../api';
 
 const WebSocketContext = createContext(null);
 
@@ -19,14 +20,10 @@ export function WebSocketProvider({ children }) {
 
         const fetchInitialData = async (token) => {
             try {
-                const notifRes = await fetch("http://127.0.0.1:8000/notifications", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (notifRes.ok && isMounted) {
-                    const data = await notifRes.json();
-                    setNotifications(data);
-                    setUnreadCount(data.filter(n => !n.read).length);
-                }
+                const notifRes = await api.get('/notifications');
+                const data = notifRes.data;
+                setNotifications(data);
+                setUnreadCount(data.filter(n => !n.read).length);
             } catch (e) {
                 console.error("Failed to fetch initial WS data", e);
             }
@@ -36,7 +33,8 @@ export function WebSocketProvider({ children }) {
             const token = localStorage.getItem("token");
             if (!token || !isMounted) return;
 
-            localWs = new WebSocket(`ws://127.0.0.1:8000/ws/${token}`);
+            const WS_URL = process.env.REACT_APP_WS_URL || 'ws://127.0.0.1:8000';
+            localWs = new WebSocket(`${WS_URL}/ws/${token}`);
             ws.current = localWs;
 
             localWs.onopen = () => {
@@ -46,12 +44,22 @@ export function WebSocketProvider({ children }) {
                 fetchInitialData(token);
             };
 
-            localWs.onclose = () => {
+            localWs.onclose = (event) => {
                 if (!isMounted) return;
-                console.log("WebSocket disconnected");
+                console.log("WebSocket disconnected", event.code);
                 setIsConnected(false);
                 clearTimeout(reconnectTimer.current);
-                reconnectTimer.current = setTimeout(connect, 3000);
+                
+                if (event.code === 1008) {
+                    console.error("WebSocket auth failed. Redirecting to login...");
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('name');
+                    localStorage.removeItem('email');
+                    localStorage.removeItem('role');
+                    window.location.href = '/';
+                } else {
+                    reconnectTimer.current = setTimeout(connect, 3000);
+                }
             };
 
             localWs.onerror = (err) => {
