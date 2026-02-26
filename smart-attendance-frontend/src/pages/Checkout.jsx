@@ -184,7 +184,8 @@ export default function Checkout() {
         <div style={{
           padding: 12,
           borderRadius: 8,
-          backgroundColor: "#f3f4f6",
+          backgroundColor: "var(--card-bg)",
+          border: "1px solid var(--border)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center"
@@ -229,7 +230,6 @@ export default function Checkout() {
         <button
           onClick={markCheckout}
           disabled={!cameraReady || loading || !bleConnected}
-          style={{ opacity: (!cameraReady || loading || !bleConnected) ? 0.6 : 1 }}
         >
           {loading ? "Checking…" : "Confirm Check‑Out"}
         </button>

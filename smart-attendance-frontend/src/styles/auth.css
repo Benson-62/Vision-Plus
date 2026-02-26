@@ -5,7 +5,7 @@
   background: var(--bg-card);
   border-radius: 20px;
   border: 1px solid var(--border);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
   animation: fadeUp 0.6s ease;
 }
 
@@ -38,6 +38,25 @@
 .auth-container button {
   width: 100%;
   margin-top: 10px;
+  background: var(--primary, #3b82f6);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.auth-container button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.auth-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .auth-alt {
@@ -52,11 +71,13 @@
     opacity: 0;
     transform: translateY(14px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .steps {
   display: flex;
   justify-content: space-between;
@@ -89,6 +110,7 @@
 .step.active::after {
   background: var(--primary);
 }
+
 .success-check {
   margin: 12px auto;
   width: 44px;
@@ -109,11 +131,13 @@
     transform: scale(0.6);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
   }
 }
+
 .face-ring {
   position: absolute;
   top: 50%;
@@ -128,10 +152,22 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
 }
+
 .quality-checks {
   display: flex;
   justify-content: space-around;

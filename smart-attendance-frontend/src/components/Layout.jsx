@@ -1,8 +1,15 @@
-export default function Layout({ title, children, maxWidth = 420 }) {
+import NotificationBell from "./NotificationBell";
+
+export default function Layout({ title, children, maxWidth = 420, hideNotificationBell = false }) {
+  const isLoggedIn = !!localStorage.getItem("token");
+
   return (
     <div style={styles.wrapper}>
       <div style={{ ...styles.card, maxWidth }}>
-        {title && <h2 style={styles.title}>{title}</h2>}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: title ? 20 : 0 }}>
+          {title && <h2 style={{ ...styles.title, marginBottom: 0 }}>{title}</h2>}
+          {isLoggedIn && !hideNotificationBell && <NotificationBell />}
+        </div>
         {children}
       </div>
     </div>

@@ -120,6 +120,21 @@ body {
 
 button,
 .primary {
-  background: var(--accent);
-  color: white;
+  background: var(--primary, var(--accent, #3b82f6));
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

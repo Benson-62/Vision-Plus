@@ -26,7 +26,10 @@ export default function Profile() {
 
     setEmail(storedEmail);
 
-    fetch(`${BASE_URL}/profile?email=${storedEmail}`)
+    const token = localStorage.getItem("token");
+    fetch(`${BASE_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(res => res.json())
       .then(data => {
         setName(data.name);
@@ -45,19 +48,24 @@ export default function Profile() {
     fd.append("email", email);
     fd.append("password", password);
 
+    const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/auth/verify-password`, {
-  method: "POST",
-  body: fd
-});
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd
+    });
 
 
-    // const data = await res.json();
-
-    if (!res.ok) {
-      setMsg("❌ Incorrect password");
-    } else {
-      setVerified(true);
-      setMsg("✅ Editing unlocked");
+    try {
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg(data.detail || "❌ Incorrect password");
+      } else {
+        setVerified(true);
+        setMsg("✅ Editing unlocked");
+      }
+    } catch (err) {
+      setMsg("❌ Incorrect password or server error");
     }
 
     setLoading(false);
@@ -76,22 +84,33 @@ export default function Profile() {
       fd.append("image", fileRef.current.files[0]);
     }
 
+    const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/update_user`, {
       method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
       body: fd
     });
 
-    const data = await res.json();
+    try {
+      const data = await res.json();
 
-    if (!res.ok) {
-      setMsg(data.detail || "Update failed");
-    } else {
-      setMsg("✅ Profile updated");
-      localStorage.setItem("email", newEmail);
-      localStorage.setItem("name", name);
-      setEditMode(false);
-      setVerified(false);
-      setPassword("");
+      if (!res.ok) {
+        setMsg(data.detail || "Update failed");
+      } else {
+        setMsg("✅ Profile updated");
+        localStorage.setItem("email", newEmail);
+        localStorage.setItem("name", name);
+
+        if (data.profile_image) {
+          setPhoto(`data:image/jpeg;base64,${data.profile_image}`);
+        }
+
+        setEditMode(false);
+        setVerified(false);
+        setPassword("");
+      }
+    } catch (err) {
+      setMsg("Update failed due to network error");
     }
 
     setLoading(false);

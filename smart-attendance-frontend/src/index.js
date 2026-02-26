@@ -7,8 +7,9 @@ import "./styles/dashboard.css";
 import "./styles/auth.css";
 import "./styles/calendar.css";
 
-const savedTheme = localStorage.getItem("theme") || "beige-brown";
-document.documentElement.setAttribute("data-theme", savedTheme);
+import { initTheme } from './utils/themeEngine';
+
+initTheme();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

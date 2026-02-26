@@ -8,7 +8,10 @@ import {
   LogOut,
   CheckCircle,
   Clock,
-  DoorOpen
+  DoorOpen,
+  FileText,
+  MessageSquare,
+  Upload
 } from "lucide-react";
 import Layout from "../components/Layout";
 
@@ -16,10 +19,17 @@ const BASE_URL = "http://127.0.0.1:8000";
 
 function ActionCard({ icon, title, subtitle, onClick }) {
   return (
-    <div className="action-card" onClick={onClick}>
-      <div className="action-icon">{icon}</div>
-      <h4>{title}</h4>
-      <p>{subtitle}</p>
+    <div className="action-card" onClick={onClick} style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", display: "flex", flexDirection: "column", alignItems: "center", textAlignment: "center" }}>
+      <div className="action-icon" style={{
+        display: "inline-flex",
+        padding: "12px",
+        borderRadius: "50%",
+        backgroundColor: "color-mix(in srgb, var(--primary) 15%, transparent)",
+        color: "var(--primary)",
+        marginBottom: "12px"
+      }}>{icon}</div>
+      <h4 style={{ color: "var(--text)", margin: "0 0 4px 0", textAlign: "center" }}>{title}</h4>
+      <p style={{ color: "var(--muted)", margin: "0", fontSize: "12px", textAlign: "center" }}>{subtitle}</p>
     </div>
   );
 }
@@ -49,8 +59,10 @@ export default function Dashboard() {
 
     async function fetchToday() {
       try {
+        const token = localStorage.getItem("token");
         const res = await fetch(
-          `${BASE_URL}/attendance/history?email=${email}`
+          `${BASE_URL}/attendance/history?email=${email}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
 
@@ -112,40 +124,40 @@ export default function Dashboard() {
               {isCheckedOut
                 ? "Checked‑Out At"
                 : isCheckedIn
-                ? "Checked‑In At"
-                : "Time"}
+                  ? "Checked‑In At"
+                  : "Time"}
             </p>
             <h3>
               <Clock size={18} />
               {isCheckedOut
                 ? todayRecord.out
                 : isCheckedIn
-                ? todayRecord.in
-                : "--"}
+                  ? todayRecord.in
+                  : "--"}
             </h3>
           </div>
         </div>
 
         <div className="action-grid">
 
-        
-          
-            <ActionCard
-              icon={<Camera size={26} />}
-              title="Mark Attendance"
-              subtitle="Face verification (Check‑In)"
-              onClick={() => navigate("/attendance")}
-            />
-         
 
 
-            <ActionCard
-              icon={<DoorOpen size={26} />}
-              title="Check‑Out"
-              subtitle="Face verification (Check‑Out)"
-              onClick={() => navigate("/checkout")}
-            />
-        
+          <ActionCard
+            icon={<Camera size={26} />}
+            title="Mark Attendance"
+            subtitle="Face verification (Check‑In)"
+            onClick={() => navigate("/attendance")}
+          />
+
+
+
+          <ActionCard
+            icon={<DoorOpen size={26} />}
+            title="Check‑Out"
+            subtitle="Face verification (Check‑Out)"
+            onClick={() => navigate("/checkout")}
+          />
+
 
           {/* ALWAYS AVAILABLE */}
           <ActionCard
@@ -160,6 +172,27 @@ export default function Dashboard() {
             title="Profile"
             subtitle="View & edit profile"
             onClick={() => navigate("/profile")}
+          />
+
+          <ActionCard
+            icon={<FileText size={26} />}
+            title="Apply Leave"
+            subtitle="Submit leave request"
+            onClick={() => navigate("/leave")}
+          />
+
+          <ActionCard
+            icon={<MessageSquare size={26} />}
+            title="Messages"
+            subtitle="Chat with colleagues"
+            onClick={() => navigate("/chat")}
+          />
+
+          <ActionCard
+            icon={<Upload size={26} />}
+            title="Upload Files"
+            subtitle="Secure document upload"
+            onClick={() => navigate("/upload")}
           />
 
           <ActionCard

@@ -38,8 +38,10 @@ export default function Calendar() {
 
     async function fetchMonth() {
       try {
+        const token = localStorage.getItem("token");
         const res = await fetch(
-          `${BASE_URL}/attendance/month?email=${email}&year=${year}&month=${month + 1}`
+          `${BASE_URL}/attendance/month?email=${email}&year=${year}&month=${month + 1}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (!res.ok) throw new Error("Calendar fetch failed");

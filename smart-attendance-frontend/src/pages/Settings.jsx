@@ -3,29 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import "../styles/settings.css";
 
-const THEMES = [
-  { id: "beige-brown", label: "Beige & Brown", primary: "#8b4513", bg: "#fdf5e6" }
-];
-
-
-function applyTheme(themeId) {
-  const selected = THEMES.find(t => t.id === themeId);
-  if (!selected) return;
-
-  document.documentElement.style.setProperty("--primary", selected.primary);
-  document.documentElement.style.setProperty("--bg", selected.bg);
-
-  if (themeId === "light") {
-    document.documentElement.setAttribute("data-theme", "light");
-    document.documentElement.style.setProperty("--text", "#0f172a");
-  } else if (themeId === "beige-brown") {
-    document.documentElement.setAttribute("data-theme", "beige-brown");
-    document.documentElement.style.setProperty("--text", "#4a2e15");
-  } else {
-    document.documentElement.setAttribute("data-theme", "dark");
-    document.documentElement.style.setProperty("--text", "#e5e7eb");
-  }
-}
+import { applyTheme, THEMES } from "../utils/themeEngine";
 
 function saveSetting(key, value) {
   localStorage.setItem(key, String(value));
@@ -51,7 +29,7 @@ export default function Settings() {
     loadSetting("theme", "beige-brown")
   );
   const [darkMode, setDarkMode] = useState(() =>
-    loadSetting("darkMode", true)
+    loadSetting("darkMode", false)
   );
   const [notifications, setNotifications] = useState(() =>
     loadSetting("notifications", true)
@@ -61,9 +39,9 @@ export default function Settings() {
   );
 
   useEffect(() => {
-    applyTheme(theme);
+    applyTheme(theme, darkMode);
     saveSetting("theme", theme);
-  }, [theme]);
+  }, [theme, darkMode]);
 
   useEffect(() => saveSetting("darkMode", darkMode), [darkMode]);
   useEffect(() => saveSetting("notifications", notifications), [notifications]);
@@ -135,7 +113,7 @@ export default function Settings() {
               >
                 <div
                   className="theme-preview"
-                  style={{ background: t.bg }}
+                  style={{ background: darkMode ? t.dark.bg : t.light.bg }}
                 >
                   <span
                     className="theme-dot"
