@@ -16,11 +16,6 @@ class Settings:
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development") # production or development
     
     # Security Features
-    ALLOWED_ORIGINS: list = [
-        "https://smart-attendance.com",
-        "https://www.smart-attendance.com",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000"
-    ]
+    ALLOWED_ORIGINS: list = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 
 settings = Settings()

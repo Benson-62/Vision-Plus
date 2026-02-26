@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Mail, Lock, KeyRound } from "lucide-react";
 import Layout from "../components/Layout";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 export default function ResetPassword() {
     const navigate = useNavigate();

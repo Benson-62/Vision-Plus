@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import { Upload, File, FileText, Download, Clock } from "lucide-react";
 import "../styles/dashboard.css";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 export default function FileUpload() {
     const [file, setFile] = useState(null);

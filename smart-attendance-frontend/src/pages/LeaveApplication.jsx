@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css"; // Reuse existing styles
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 export default function LeaveApplication() {
     const navigate = useNavigate();

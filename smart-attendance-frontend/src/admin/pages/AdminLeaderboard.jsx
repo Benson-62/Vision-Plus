@@ -4,7 +4,7 @@ import { Award, Medal, CheckCircle2 } from "lucide-react";
 import Layout from "../../components/Layout";
 import "../styles/admin.css";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 export default function AdminLeaderboard() {
     const navigate = useNavigate();
