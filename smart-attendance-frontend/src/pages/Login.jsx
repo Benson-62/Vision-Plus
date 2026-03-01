@@ -64,6 +64,9 @@ export default function Login() {
   return (
     <Layout hideNotificationBell>
       <div className="auth-container">
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          <img src="/logo512.png" alt="Vision Plus Logo" style={{ width: 80, height: 80, borderRadius: "20%" }} />
+        </div>
         <h2 className="auth-title">Welcome Back</h2>
         <p className="auth-sub">Login to your account</p>
 

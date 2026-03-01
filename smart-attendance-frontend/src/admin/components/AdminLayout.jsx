@@ -15,7 +15,10 @@ export default function AdminLayout({ children }) {
     <div className="admin-wrapper">
       {/* SIDEBAR */}
       <aside className="admin-sidebar">
-        <h2 className="admin-logo">Admin</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center", marginBottom: "2rem" }}>
+          <img src="/logo192.png" alt="Vision Plus Logo" style={{ width: 40, height: 40, borderRadius: "8px" }} />
+          <h2 className="admin-logo" style={{ margin: 0, paddingBottom: 0, borderBottom: "none" }}>Admin</h2>
+        </div>
 
         <nav className="admin-nav">
           <NavLink to="/admin/dashboard">Dashboard</NavLink>

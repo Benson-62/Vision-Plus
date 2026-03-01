@@ -66,8 +66,8 @@ export default function Welcome() {
             <div style={{ position: 'absolute', inset: 0, opacity: 0.03, pointerEvents: 'none', backgroundImage: 'radial-gradient(var(--text) 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 
             <div className="welcome-content" style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '40px', background: 'var(--card)', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', maxWidth: '400px', width: '90%' }}>
-                <div style={{ display: 'inline-flex', padding: '24px', borderRadius: '50%', background: 'color-mix(in srgb, var(--primary) 12%, transparent)', marginBottom: '24px' }}>
-                    <Users size={48} color="var(--primary)" />
+                <div style={{ display: 'inline-flex', padding: '16px', borderRadius: '50%', background: 'color-mix(in srgb, var(--primary) 12%, transparent)', marginBottom: '24px' }}>
+                    <img src="/logo512.png" alt="Vision Plus" style={{ width: 64, height: 64, borderRadius: "50%" }} />
                 </div>
                 <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>Welcome, {name.split(' ')[0]}!</h1>
                 <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '32px', lineHeight: '1.5', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
