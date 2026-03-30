@@ -13,8 +13,16 @@ export default function Signup() {
   const [step, setStep] = useState(1); // 1=Details, 2=Face, 3=Submit
 
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    upper: false,
+    lower: false,
+    number: false,
+    special: false
+  });
 
   const [cameraReady, setCameraReady] = useState(false);
   const [faceBlob, setFaceBlob] = useState(null);
@@ -30,11 +38,39 @@ export default function Signup() {
     size: true
   });
 
+  function validatePassword(val) {
+    setPassword(val);
+    setPasswordStrength({
+      length: val.length >= 8 && val.length <= 12,
+      upper: /[A-Z]/.test(val),
+      lower: /[a-z]/.test(val),
+      number: /\d/.test(val),
+      special: /[@$!%*?&#^_-]/.test(val)
+    });
+  }
+
+  function validateUsername(val) {
+    const valLower = val.toLowerCase();
+    setUsername(valLower);
+  }
+
   function goToFaceStep() {
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !username) {
       setMessage("❌ Fill all details first");
       return;
     }
+
+    const isValidPassword = Object.values(passwordStrength).every(Boolean);
+    if (!isValidPassword) {
+      setMessage("❌ Password does not meet security requirements");
+      return;
+    }
+
+    if (!/^[a-z0-9_.]+$/.test(username)) {
+      setMessage("❌ Username can only contain lowercase letters, numbers, underscores, and dots");
+      return;
+    }
+
     setMessage("");
     setStep(2);
   }
@@ -136,11 +172,12 @@ export default function Signup() {
     try {
       const fd = new FormData();
       fd.append("name", name);
+      fd.append("username", username);
       fd.append("email", email);
       fd.append("password", password);
       fd.append("image", faceBlob, "face.jpg");
 
-      const res = await fetch(`${BASE_URL}/register`, {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         body: fd
       });
@@ -176,8 +213,18 @@ export default function Signup() {
         {step === 1 && (
           <>
             <div className="input-icon"><User size={18} /><input placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} /></div>
+            <div className="input-icon"><User size={18} /><input placeholder="Username" value={username} onChange={e => validateUsername(e.target.value)} /></div>
             <div className="input-icon"><Mail size={18} /><input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} /></div>
-            <div className="input-icon"><Lock size={18} /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+            <div className="input-icon"><Lock size={18} /><input type="password" placeholder="Password" value={password} onChange={e => validatePassword(e.target.value)} /></div>
+
+            <div className="password-strength" style={{ fontSize: "0.8rem", textAlign: "left", margin: "10px 0" }}>
+              <div style={{ color: passwordStrength.length ? "green" : "gray" }}>8-12 characters: {passwordStrength.length ? "✅" : "❌"}</div>
+              <div style={{ color: passwordStrength.upper ? "green" : "gray" }}>Uppercase letter: {passwordStrength.upper ? "✅" : "❌"}</div>
+              <div style={{ color: passwordStrength.lower ? "green" : "gray" }}>Lowercase letter: {passwordStrength.lower ? "✅" : "❌"}</div>
+              <div style={{ color: passwordStrength.number ? "green" : "gray" }}>Number: {passwordStrength.number ? "✅" : "❌"}</div>
+              <div style={{ color: passwordStrength.special ? "green" : "gray" }}>Special Character (@$!%*?&#^_-): {passwordStrength.special ? "✅" : "❌"}</div>
+            </div>
+
             <button onClick={goToFaceStep}>Continue to Face Capture</button>
           </>
         )}

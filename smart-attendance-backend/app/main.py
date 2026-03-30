@@ -11,6 +11,7 @@ import numpy as np
 import cv2
 import io
 import base64
+import asyncio
 from PIL import Image
 
 from .db import users_collection, logs_collection, attendance_audit_collection
@@ -130,34 +131,7 @@ def root():
         "user_count": users_collection.count_documents({})
     }
 
-# ================= REGISTER =================
-@app.post("/register")
-async def register_user(
-    name: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    image: UploadFile = File(...)
-):
-    if users_collection.find_one({"email": email}):
-        raise HTTPException(status_code=400, detail="User already registered")
-
-    image_bytes = await image.read()
-    embedding = get_face_embedding(image_bytes)
-    if embedding is None:
-        raise HTTPException(status_code=400, detail="No face detected")
-
-    users_collection.insert_one({
-        "name": name,
-        "email": email,
-        "password_hash": hash_password(password),
-        "role": "employee",
-        "active": True,
-        "embedding": embedding.tolist(),
-        "profile_image": base64.b64encode(image_bytes).decode(),
-        "created_at": datetime.utcnow()
-    })
-
-    return {"status": "ok"}
+# ================= REGISTER (MOVED TO auth_routes.py) =================
 
 # ================= PROFILE =================
 @app.get("/profile")
@@ -187,7 +161,7 @@ async def update_user(
 
     if image:
         img = await image.read()
-        emb = get_face_embedding(img)
+        emb = await asyncio.to_thread(get_face_embedding, img)
         if emb is None:
             raise HTTPException(status_code=400, detail="No face detected")
 
@@ -236,8 +210,8 @@ async def checkin_live(
     img1 = await image1.read()
     img2 = await image2.read()
 
-    emb1 = get_face_embedding(img1)
-    emb2 = get_face_embedding(img2)
+    emb1 = await asyncio.to_thread(get_face_embedding, img1)
+    emb2 = await asyncio.to_thread(get_face_embedding, img2)
     if emb1 is None or emb2 is None:
         raise HTTPException(status_code=400, detail="Face not detected")
 
@@ -245,7 +219,7 @@ async def checkin_live(
     if not (compare_embeddings(known, emb1)[0] and compare_embeddings(known, emb2)[0]):
         raise HTTPException(status_code=401, detail="Face mismatch")
 
-    if not liveness_pass(img1, img2):
+    if not await asyncio.to_thread(liveness_pass, img1, img2):
         raise HTTPException(status_code=400, detail="Liveness failed")
 
     if latitude is not None and longitude is not None:
@@ -324,8 +298,8 @@ async def checkout_live(
     img1 = await image1.read()
     img2 = await image2.read()
 
-    emb1 = get_face_embedding(img1)
-    emb2 = get_face_embedding(img2)
+    emb1 = await asyncio.to_thread(get_face_embedding, img1)
+    emb2 = await asyncio.to_thread(get_face_embedding, img2)
     if emb1 is None or emb2 is None:
         raise HTTPException(status_code=400, detail="Face not detected")
 
@@ -333,7 +307,7 @@ async def checkout_live(
     if not (compare_embeddings(known, emb1)[0] and compare_embeddings(known, emb2)[0]):
         raise HTTPException(status_code=401, detail="Face mismatch")
 
-    if not liveness_pass(img1, img2):
+    if not await asyncio.to_thread(liveness_pass, img1, img2):
         raise HTTPException(status_code=400, detail="Liveness failed")
 
     now = datetime.now()

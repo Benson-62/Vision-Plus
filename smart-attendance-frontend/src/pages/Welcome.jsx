@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Users, Loader2, Server, ShieldCheck, Database, Fingerprint } from "lucide-react";
+import { Loader2, Server, ShieldCheck, Database, Fingerprint } from "lucide-react";
 import "../styles/welcome.css";
 
 export default function Welcome() {

@@ -28,8 +28,10 @@ import pymongo
 try:
     # Users
     users_collection.create_index([("email", pymongo.ASCENDING)], unique=True, background=True)
+    users_collection.create_index([("username", pymongo.ASCENDING)], unique=True, background=True, sparse=True)
     users_collection.create_index([("role", pymongo.ASCENDING), ("active", pymongo.ASCENDING)], background=True)
     users_collection.create_index([("department", pymongo.ASCENDING)], background=True)
+    users_collection.create_index([("active_sessions.session_id", pymongo.ASCENDING)], background=True)
     
     # Logs (Attendance)
     logs_collection.create_index([("email", pymongo.ASCENDING), ("date", pymongo.ASCENDING)], background=True)

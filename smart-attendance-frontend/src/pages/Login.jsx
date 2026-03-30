@@ -19,7 +19,7 @@ export default function Login() {
     setError("");
 
     if (!email || !password) {
-      setError("Email and password are required");
+      setError("Email/Username and password are required");
       return;
     }
 
@@ -33,7 +33,8 @@ export default function Login() {
       // ✅ FIX: send to /auth/login for OAuth2 JWT
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
-        body: formData
+        body: formData,
+        credentials: "include" // ✅ NEEDED FOR SET-COOKIE (HttpOnly Refresh Token)
       });
 
       const data = await res.json();
@@ -74,7 +75,7 @@ export default function Login() {
           <div className="input-icon">
             <Mail size={18} />
             <input
-              placeholder="Email"
+              placeholder="Email or Username"
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
